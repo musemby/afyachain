@@ -1,0 +1,22 @@
+{
+  "name": "tutorial-network",
+  "version": "0.0.1",
+  "description": "&#34;E tutoriel&#34;",
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "author": "Musembi",
+  "email": "musembinzioki@gmail.com",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "composer-admin": "latest",
+    "composer-client": "latest",
+    "composer-common": "latest",
+    "composer-connector-embedded": "latest",
+    "chai": "latest",
+    "eslint": "latest",
+    "istanbul": "latest",
+    "mkdirp": "latest",
+    "mocha": "latest"
+  }
+}
