@@ -1,0 +1,163 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+version: '2'
+
+volumes:
+  orderer.safemed.com:
+  peer0.customer.safemed.com:
+  peer1.customer.safemed.com:
+  peer0.maker.safemed.com:
+  peer1.maker.safemed.com:
+  peer0.retailer.safemed.com:
+  peer1.retailer.safemed.com:
+  peer0.supplier.safemed.com:
+  peer1.supplier.safemed.com:
+
+networks:
+  byfn:
+
+services:
+
+  orderer.safemed.com:
+    extends:
+      file:   base/docker-compose-base.yaml
+      service: orderer.safemed.com
+    container_name: orderer.safemed.com
+    networks:
+      - byfn
+
+  peer0.customer.safemed.com:
+    container_name: peer0.customer.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.customer.safemed.com
+    networks:
+      - byfn
+
+  peer1.customer.safemed.com:
+    container_name: peer1.customer.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.customer.safemed.com
+    networks:
+      - byfn
+
+  peer0.maker.safemed.com:
+    container_name: peer0.maker.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.maker.safemed.com
+    networks:
+      - byfn
+
+  peer1.maker.safemed.com:
+    container_name: peer1.maker.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.maker.safemed.com
+    networks:
+      - byfn
+
+  peer0.retailer.safemed.com:
+    container_name: peer0.retailer.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.retailer.safemed.com
+    networks:
+      - byfn
+
+  peer1.retailer.safemed.com:
+    container_name: peer1.retailer.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.retailer.safemed.com
+    networks:
+      - byfn
+
+  peer0.supplier.safemed.com:
+    container_name: peer0.supplier.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer0.supplier.safemed.com
+    networks:
+      - byfn
+
+  peer1.supplier.safemed.com:
+    container_name: peer1.supplier.safemed.com
+    extends:
+      file:  base/docker-compose-base.yaml
+      service: peer1.supplier.safemed.com
+    networks:
+      - byfn
+
+  cli:
+    container_name: cli
+    image: hyperledger/fabric-tools:$IMAGE_TAG
+    tty: true
+    stdin_open: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      # - CORE_LOGGING_LEVEL=INFO
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.customer.safemed.com:7051
+      - CORE_PEER_LOCALMSPID=CustomerMSP
+      # - CORE_PEER_TLS_ENABLED=true
+      # - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.customer.safemed.com/tls/server.crt
+      # - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.customer.safemed.com/tls/server.key
+      # - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.customer.safemed.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/customer.safemed.com/users/Admin@customer.safemed.com/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./../chaincode/:/opt/gopath/src/github.com/chaincode
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
+        - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
+    depends_on:
+      - orderer.safemed.com
+      - peer0.customer.safemed.com
+      - peer1.customer.safemed.com
+      - peer0.maker.safemed.com
+      - peer1.maker.safemed.com
+      - peer0.retailer.safemed.com
+      - peer1.retailer.safemed.com
+      - peer0.supplier.safemed.com
+      - peer1.supplier.safemed.com
+
+    networks:
+      - byfn
+
+  chaincode:
+    container_name: chaincode
+    image: hyperledger/fabric-ccenv
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=example02
+      - CORE_PEER_ADDRESS=peer:7051
+      - CORE_PEER_LOCALMSPID=DEFAULT
+      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp
+    working_dir: /opt/gopath/src/chaincode
+    command: /bin/bash -c 'sleep 6000000'
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./msp:/etc/hyperledger/msp
+        - ./../chaincode:/opt/gopath/src/chaincode
+    depends_on:
+      - orderer.safemed.com
+      - peer0.customer.safemed.com
+      - peer1.customer.safemed.com
+      - peer0.maker.safemed.com
+      - peer1.maker.safemed.com
+      - peer0.retailer.safemed.com
+      - peer1.retailer.safemed.com
+      - peer0.supplier.safemed.com
+      - peer1.supplier.safemed.com

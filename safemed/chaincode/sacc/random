@@ -1,0 +1,2 @@
+peer chaincode install -p chaincodedev/chaincode/sacc -n mycc -v 0
+peer chaincode install -p /opt/gopath/src/github.com/chaincode/sacc/sacc -n mycc -v 0

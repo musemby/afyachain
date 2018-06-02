@@ -1,0 +1,46 @@
+OrdererOrgs:
+  - Name: Orderer
+    Domain: safemed.com
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  - Name: Maker
+    Domain: maker.safemed.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+
+    Users:
+      Count: 2
+
+  - Name: Supplier
+    Domain: supplier.safemed.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+
+    Users:
+      Count: 2
+
+  - Name: Retailer
+    Domain: retailer.safemed.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+
+    Users:
+      Count: 2
+
+  - Name: Customer
+    Domain: customer.safemed.com
+    EnableNodeOUs: true
+
+    Template:
+      Count: 2
+
+    Users:
+      Count: 3
