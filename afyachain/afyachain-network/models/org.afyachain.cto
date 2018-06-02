@@ -1,0 +1,109 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace org.afyachain
+
+
+enum participantType {
+  o MANUFACTURER
+  o SUPPLIER
+  o RETAILER
+}
+
+participant ChainParticipant identified by participantKey {
+  o String participantKey
+  o participantType type
+  o String name
+  o String location
+  o String phoneNumber
+  o String email
+  o DateTime created
+  o DateTime updated
+}
+
+asset Token identified by code{
+  o String code
+  o DateTime created
+  o DateTime updated
+}
+
+asset Brand identified by brandId {
+  o String brandId
+  o String name
+  o String mainIngredient
+  o String[] ingredients
+  o Batch[] batches
+  --> ChainParticipant owner
+  o DateTime created
+  o DateTime updated
+}
+
+asset Batch identified by batchId {
+  o String batchId
+  o Brand brand
+  o Token token
+  o DateTime expiryDate
+  o Unit[] units
+  --> ChainParticipant owner
+  --> ChainParticipant tempOwner
+  --> Batch parentBatch
+  o DateTime created
+  o DateTime updated
+}
+
+asset Unit identified by unitId {
+  o String unitId
+  o String[] ownerIds
+  --> Batch batch
+  --> Token token
+  --> ChainParticipant owner
+  o DateTime created
+  o DateTime updated
+}
+
+transaction DispatchBatch {
+  --> Batch batch
+  --> ChainParticipant recipient
+  o DateTime dispatchedOn
+}
+
+transaction SplitBatch {
+  --> Batch parentBatch
+  o Integer quantity
+}
+
+transaction SellUnit {
+  --> Unit unit
+  o DateTime soldOn
+}
+
+transaction VerifyBatch {
+  o String code
+  o DateTime verifiedOn
+}
+
+transaction ReceiveBatch {
+  --> Batch batch
+  o DateTime receivedOn
+}
+
+transaction VerifyUnit {
+  o String code
+  o DateTime VerifiedOn
+}
+
+transaction ReceiveUnit {
+  --> Unit unit
+  o DateTime ReceivedOn
+}
