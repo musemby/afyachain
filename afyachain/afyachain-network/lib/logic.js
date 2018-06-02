@@ -69,7 +69,6 @@ await function receiveBatch(receiveBatchTx) {
     }
 };
 
-
 await function verifyUnit(verifyUnitTx) {
     let code = verifyUnitTx.code;
     let verifiedOn = verifyUnitTx.verifiedOn;
@@ -77,6 +76,20 @@ await function verifyUnit(verifyUnitTx) {
     let assetRegistry = await getAssetRegistry(biznet + '.Unit');
     await assetRegistry.get(code);
 };
+
+await function receiveUnit(receiveUnitTx) {
+    let unit = receiveUnitTx.unit;
+
+    if (unit.tempOwner.participantId == currentParticipant.participantId) {
+        unit.owner = currentParticipant;
+        unit.tempOwner = null;
+
+        let assetRegistry = await getAssetRegistry(biznet + '.Unit');
+        assetRegistry.update(unit);
+    } else {
+        throw "The unit was not intended for this participant";
+    }
+}
 
 // split a batch
 async function splitBatch(splitBatchTx) {

@@ -69,6 +69,7 @@ asset Unit identified by code {
   o Boolean sold
   --> Batch batch
   // --> Token token
+  --> ChainParticipant tempOwner
   --> ChainParticipant owner
   o DateTime created
   o DateTime updated
@@ -107,5 +108,5 @@ transaction VerifyUnit {
 
 transaction ReceiveUnit {
   --> Unit unit
-  o DateTime ReceivedOn
+  o DateTime receivedOn
 }
