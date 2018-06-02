@@ -17,6 +17,7 @@
 const factory = getFactory();
 const biznet = 'org.afyachain';
 
+
 // dispatch a batch from one participant to another
 async function dispatchBatch(dispatchBatchTx) {
     let batch = dispatchBatchTx.batch;
@@ -31,6 +32,7 @@ async function dispatchBatch(dispatchBatchTx) {
     await assetRegistry.update(batch);
 };
 
+
 // sell a unit
 await function sellUnit(sellUnitTx) {
     let unit = sellUnitTx.unit;
@@ -41,17 +43,21 @@ await function sellUnit(sellUnitTx) {
     await assetRegistry.update(unit)
 };
 
+
 await function verifyBatch(verifyBatchTx) {
     let code = verifyBatchTx.code;
+    // TODO: add batch verifying logic
     let verifiedOn = verifyBatchTx.verifiedOn;
     let assetRegistry = await getAssetRegistry(biznet + '.Batch');
     await assetRegistry.get(code);
 };
 
+
 await function receiveBatch(receiveBatchTx) {
     let batch = receiveBatchTx.batch;
     let receivedOn = receiveBatchTx.receivedOn;
     var currentParticipant = getCurrentParticipant();
+
     if (batch.tempOwner.participantId == currentParticipant.participantId) {
         batch.owner = currentParticipant;
         batch.tempOwner = null;
@@ -61,8 +67,16 @@ await function receiveBatch(receiveBatchTx) {
     } else {
         throw "The batch was not intended for this participant";
     }
-;}
+};
 
+
+await function verifyUnit(verifyUnitTx) {
+    let code = verifyUnitTx.code;
+    let verifiedOn = verifyUnitTx.verifiedOn;
+
+    let assetRegistry = await getAssetRegistry(biznet + '.Unit');
+    await assetRegistry.get(code);
+};
 
 // split a batch
 async function splitBatch(splitBatchTx) {
