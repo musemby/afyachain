@@ -26,10 +26,10 @@ async function dispatchBatch(dispatchBatchTx) {
     // TODO: Add validations
 
     batch.tempOwner = recipient;
-    batch.updated = dispatchedOn
+    batch.updated = dispatchedOn;
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.update(batch);
-}
+};
 
 // sell a unit
 await function sellUnit(sellUnitTx) {
@@ -39,8 +39,29 @@ await function sellUnit(sellUnitTx) {
     unit.sold = true;
     let assetRegistry = await getAssetRegistry(biznet + '.Unit');
     await assetRegistry.update(unit)
-}
+};
 
+await function verifyBatch(verifyBatchTx) {
+    let code = verifyBatchTx.code;
+    let verifiedOn = verifyBatchTx.verifiedOn;
+    let assetRegistry = await getAssetRegistry(biznet + '.Batch');
+    await assetRegistry.get(code);
+};
+
+await function receiveBatch(receiveBatchTx) {
+    let batch = receiveBatchTx.batch;
+    let receivedOn = receiveBatchTx.receivedOn;
+    var currentParticipant = getCurrentParticipant();
+    if (batch.tempOwner.participantId == currentParticipant.participantId) {
+        batch.owner = currentParticipant;
+        batch.tempOwner = null;
+
+        let assetRegistry = await getAssetRegistry(biznet + '.Batch');
+        assetRegistry.update(batch);
+    } else {
+        throw "The batch was not intended for this participant";
+    }
+;}
 
 
 // split a batch

@@ -21,8 +21,8 @@ enum participantType {
   o RETAILER
 }
 
-participant ChainParticipant identified by participantKey {
-  o String participantKey
+participant ChainParticipant identified by participantId {
+  o String participantId
   o participantType type
   o String name
   o String location
@@ -50,8 +50,8 @@ asset Brand identified by brandId {
   o DateTime updated
 }
 
-asset Batch identified by batchId {
-  o String batchId
+asset Batch identified by code {
+  o String code
   o Brand brand
   o Token token
   o DateTime expiryDate
@@ -63,12 +63,12 @@ asset Batch identified by batchId {
   o DateTime updated
 }
 
-asset Unit identified by unitId {
-  o String unitId
+asset Unit identified by code {
+  o String code
   o String[] ownerIds
   o Boolean sold
   --> Batch batch
-  --> Token token
+  // --> Token token
   --> ChainParticipant owner
   o DateTime created
   o DateTime updated
