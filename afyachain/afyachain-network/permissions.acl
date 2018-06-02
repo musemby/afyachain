@@ -15,51 +15,70 @@
 /**
  * Sample access control list.
  */
-rule EverybodyCanReadEverything {
-    description: "Allow all participants read access to all resources"
-    participant: "org.afyachain.SampleParticipant"
-    operation: READ
-    resource: "org.afyachain.*"
-    action: ALLOW
-}
+// rule EverybodyCanReadEverything {
+//     description: "Allow all participants read access to all resources"
+//     participant: "org.afyachain.SampleParticipant"
+//     operation: READ
+//     resource: "org.afyachain.*"
+//     action: ALLOW
+// }
 
-rule EverybodyCanSubmitTransactions {
-    description: "Allow all participants to submit transactions"
-    participant: "org.afyachain.SampleParticipant"
-    operation: CREATE
-    resource: "org.afyachain.SampleTransaction"
-    action: ALLOW
-}
+// rule EverybodyCanSubmitTransactions {
+//     description: "Allow all participants to submit transactions"
+//     participant: "org.afyachain.SampleParticipant"
+//     operation: CREATE
+//     resource: "org.afyachain.SampleTransaction"
+//     action: ALLOW
+// }
 
-rule OwnerHasFullAccessToTheirAssets {
-    description: "Allow all participants full access to their assets"
-    participant(p): "org.afyachain.SampleParticipant"
+// rule OwnerHasFullAccessToTheirAssets {
+//     description: "Allow all participants full access to their assets"
+//     participant(p): "org.afyachain.SampleParticipant"
+//     operation: ALL
+//     resource(r): "org.afyachain.SampleAsset"
+//     condition: (r.owner.getIdentifier() === p.getIdentifier())
+//     action: ALLOW
+// }
+
+// rule SystemACL {
+//   description:  "System ACL to permit all access"
+//   participant: "org.hyperledger.composer.system.Participant"
+//   operation: ALL
+//   resource: "org.hyperledger.composer.system.**"
+//   action: ALLOW
+// }
+
+// rule NetworkAdminUser {
+//     description: "Grant business network administrators full access to user resources"
+//     participant: "org.hyperledger.composer.system.NetworkAdmin"
+//     operation: ALL
+//     resource: "**"
+//     action: ALLOW
+// }
+
+// rule NetworkAdminSystem {
+//     description: "Grant business network administrators full access to system resources"
+//     participant: "org.hyperledger.composer.system.NetworkAdmin"
+//     operation: ALL
+//     resource: "org.hyperledger.composer.system.**"
+//     action: ALLOW
+// }
+
+/**
+ * Access control rules for tutorial-network
+ */
+rule Default {
+    description: "Allow all participants access to all resources"
+    participant: "ANY"
     operation: ALL
-    resource(r): "org.afyachain.SampleAsset"
-    condition: (r.owner.getIdentifier() === p.getIdentifier())
+    resource: "org.afyachain.*"
     action: ALLOW
 }
 
 rule SystemACL {
   description:  "System ACL to permit all access"
-  participant: "org.hyperledger.composer.system.Participant"
+  participant: "ANY"
   operation: ALL
   resource: "org.hyperledger.composer.system.**"
   action: ALLOW
-}
-
-rule NetworkAdminUser {
-    description: "Grant business network administrators full access to user resources"
-    participant: "org.hyperledger.composer.system.NetworkAdmin"
-    operation: ALL
-    resource: "**"
-    action: ALLOW
-}
-
-rule NetworkAdminSystem {
-    description: "Grant business network administrators full access to system resources"
-    participant: "org.hyperledger.composer.system.NetworkAdmin"
-    operation: ALL
-    resource: "org.hyperledger.composer.system.**"
-    action: ALLOW
 }
