@@ -15,6 +15,8 @@
 'use strict';
 
 const factory = getFactory();
+const biznet = 'org.afyachain';
+
 // dispatch a batch from one participant to another
 async function dispatchBatch(dispatchBatchTx) {
     let batch = dispatchBatchTx.batch;
@@ -26,8 +28,20 @@ async function dispatchBatch(dispatchBatchTx) {
     batch.tempOwner = recipient;
     batch.updated = dispatchedOn
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
-    await assetRegistry.update(dispatchBatchTx.batch);
+    await assetRegistry.update(batch);
 }
+
+// sell a unit
+await function sellUnit(sellUnitTx) {
+    let unit = sellUnitTx.unit;
+    let soldOn = sellUnitTx.soldOn;
+
+    unit.sold = true;
+    let assetRegistry = await getAssetRegistry(biznet + '.Unit');
+    await assetRegistry.update(unit)
+}
+
+
 
 // split a batch
 async function splitBatch(splitBatchTx) {
@@ -39,12 +53,22 @@ async function splitBatch(splitBatchTx) {
         let unit = parentBatch.units[i]
         newUnits.push(unit)
     }
+    // now
+    let now = new Date();
+    now = now.toISOString();
+
     // TODO: auto incrementing strategy for ids
     let subBatch = factory.newAsset('org.afyachain', 'Batch', '67');
+    subBatch.parentBatch = parentBatch;
+    subBatch.brand = parentBatch.brand;
+    subBatch.token = parentBatch.token;
+    subBatch.expiryDate = parentBatch.expiryDate;
+    subBatch.units = newUnits;
+    subBatch.created = now;
+    subBatch.updated = now;
 
-    let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
+    let assetRegistry = await getAssetRegistry(biznet + '.Batch');
     await assetRegistry.add(subBatch);
-
 }
 
 async function sampleTransaction(tx) {

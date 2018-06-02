@@ -32,6 +32,7 @@ participant ChainParticipant identified by participantKey {
   o DateTime updated
 }
 
+
 asset Token identified by code{
   o String code
   o DateTime created
@@ -65,6 +66,7 @@ asset Batch identified by batchId {
 asset Unit identified by unitId {
   o String unitId
   o String[] ownerIds
+  o Boolean sold
   --> Batch batch
   --> Token token
   --> ChainParticipant owner
