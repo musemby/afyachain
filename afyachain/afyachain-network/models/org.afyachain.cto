@@ -21,13 +21,12 @@ enum participantType {
   o RETAILER
 }
 
-participant ChainParticipant identified by participantId {
-  o String participantId
+participant ChainParticipant identified by email {
+  o String email
   o participantType type
   o String name
   o String location
   o String phoneNumber
-  o String email
   o DateTime created
   o DateTime updated
 }

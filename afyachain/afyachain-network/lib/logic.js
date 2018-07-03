@@ -30,12 +30,11 @@ async function dispatchBatch(dispatchBatchTx) {
     batch.updated = dispatchedOn;
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.update(batch);
-};
-
+}
 
 // sell a unit
-await function sellUnit(sellUnitTx) {
-    let unit = sellUnitTx.unit;
+async function sellUnit(sellUnitTx) {
+    // let unit = sellUnitTx.unit;
     let soldOn = sellUnitTx.soldOn;
 
     unit.sold = true;
@@ -44,16 +43,16 @@ await function sellUnit(sellUnitTx) {
 };
 
 
-await function verifyBatch(verifyBatchTx) {
+async function verifyBatch(verifyBatchTx) {
     let code = verifyBatchTx.code;
     // TODO: add batch verifying logic
     let verifiedOn = verifyBatchTx.verifiedOn;
     let assetRegistry = await getAssetRegistry(biznet + '.Batch');
     await assetRegistry.get(code);
-};
+}
 
 
-await function receiveBatch(receiveBatchTx) {
+async function receiveBatch(receiveBatchTx) {
     let batch = receiveBatchTx.batch;
     let receivedOn = receiveBatchTx.receivedOn;
     var currentParticipant = getCurrentParticipant();
@@ -69,7 +68,7 @@ await function receiveBatch(receiveBatchTx) {
     }
 };
 
-await function verifyUnit(verifyUnitTx) {
+async function verifyUnit(verifyUnitTx) {
     let code = verifyUnitTx.code;
     let verifiedOn = verifyUnitTx.verifiedOn;
 
@@ -77,7 +76,7 @@ await function verifyUnit(verifyUnitTx) {
     await assetRegistry.get(code);
 };
 
-await function receiveUnit(receiveUnitTx) {
+async function receiveUnit(receiveUnitTx) {
     let unit = receiveUnitTx.unit;
 
     if (unit.tempOwner.participantId == currentParticipant.participantId) {
