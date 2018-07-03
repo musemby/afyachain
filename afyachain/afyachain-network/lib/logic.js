@@ -14,9 +14,21 @@
 
 'use strict';
 
+const uuidv4 = require('uuid/v4');
+
 const factory = getFactory();
 const biznet = 'org.afyachain';
 
+
+async function createBrand(createBrandTx) {
+    let brandId = uuidv4();
+    let name = createBrandTx.name;
+    let mainIngredient = createBrandTx.mainIngredient;
+    let ingredients = createBrandTx.ingredients;
+
+    let created = moment().format();
+    let updated = moment().format();
+}
 
 // dispatch a batch from one participant to another
 async function dispatchBatch(dispatchBatchTx) {

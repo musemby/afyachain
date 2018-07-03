@@ -74,6 +74,16 @@ asset Unit identified by code {
   o DateTime updated
 }
 
+transaction createBand {
+  o String brandId
+  o String name
+  o String mainIngredient
+  o String[] ingredients
+  o ChainParticipant owner
+  o DateTime created
+  o DateTime updated
+}
+
 transaction DispatchBatch {
   --> Batch batch
   --> ChainParticipant recipient

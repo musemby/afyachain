@@ -3,7 +3,7 @@
     "composer": "^0.19.7"
   },
   "name": "afyachain-network",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Pharma supply chain",
   "scripts": {
     "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName . -a ./dist/afyachain-network.bna",
@@ -32,5 +32,9 @@
     "nyc": "latest",
     "mkdirp": "latest",
     "mocha": "latest"
+  },
+  "dependencies": {
+    "moment": "^2.22.2",
+    "uuid": "^3.3.2"
   }
 }
