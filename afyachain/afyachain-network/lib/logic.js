@@ -14,20 +14,22 @@
 
 'use strict';
 
-const uuidv4 = require('uuid/v4');
-
 const factory = getFactory();
 const biznet = 'org.afyachain';
 
 
 async function createBrand(createBrandTx) {
-    let brandId = uuidv4();
-    let name = createBrandTx.name;
-    let mainIngredient = createBrandTx.mainIngredient;
-    let ingredients = createBrandTx.ingredients;
+    let newBrand = {
+        brandId: createBrandTx.brandId,
+        name: createBrandTx.name,
+        mainIngredient: createBrandTx.mainIngredient,
+        ingredients: createBrandTx.ingredients,
+        created: createBrandTx.created,
+        updated: createBrandTx.updated,
+    }
 
-    let created = moment().format();
-    let updated = moment().format();
+    let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
+    await assetRegistry.add(newBrand);
 }
 
 // dispatch a batch from one participant to another

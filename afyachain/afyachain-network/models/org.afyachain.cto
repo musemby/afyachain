@@ -43,7 +43,6 @@ asset Brand identified by brandId {
   o String name
   o String mainIngredient
   o String[] ingredients
-  o Batch[] batches
   --> ChainParticipant owner
   o DateTime created
   o DateTime updated
@@ -74,7 +73,7 @@ asset Unit identified by code {
   o DateTime updated
 }
 
-transaction createBand {
+transaction createBrand {
   o String brandId
   o String name
   o String mainIngredient

@@ -32,7 +32,6 @@ export class ChainParticipantComponent implements OnInit {
   private currentId;
   private errorMessage;
 
-  participantId = new FormControl('', Validators.required);
   type = new FormControl('', Validators.required);
   name = new FormControl('', Validators.required);
   location = new FormControl('', Validators.required);
@@ -44,7 +43,6 @@ export class ChainParticipantComponent implements OnInit {
 
   constructor(private serviceChainParticipant: ChainParticipantService, fb: FormBuilder) {
     this.myForm = fb.group({
-      participantId: this.participantId,
       type: this.type,
       name: this.name,
       location: this.location,
@@ -108,7 +106,6 @@ export class ChainParticipantComponent implements OnInit {
   addParticipant(form: any): Promise<any> {
     this.participant = {
       $class: 'org.afyachain.ChainParticipant',
-      'participantId': this.participantId.value,
       'type': this.type.value,
       'name': this.name.value,
       'location': this.location.value,
@@ -119,7 +116,6 @@ export class ChainParticipantComponent implements OnInit {
     };
 
     this.myForm.setValue({
-      'participantId': null,
       'type': null,
       'name': null,
       'location': null,
@@ -134,7 +130,6 @@ export class ChainParticipantComponent implements OnInit {
     .then(() => {
       this.errorMessage = null;
       this.myForm.setValue({
-        'participantId': null,
         'type': null,
         'name': null,
         'location': null,
@@ -166,7 +161,7 @@ export class ChainParticipantComponent implements OnInit {
       'updated': this.updated.value
     };
 
-    return this.serviceChainParticipant.updateParticipant(form.get('participantId').value, this.participant)
+    return this.serviceChainParticipant.updateParticipant(form.get('email').value, this.participant)
     .toPromise()
     .then(() => {
       this.errorMessage = null;
@@ -212,7 +207,6 @@ export class ChainParticipantComponent implements OnInit {
     .then((result) => {
       this.errorMessage = null;
       const formObject = {
-        'participantId': null,
         'type': null,
         'name': null,
         'location': null,
@@ -222,10 +216,10 @@ export class ChainParticipantComponent implements OnInit {
         'updated': null
       };
 
-      if (result.participantId) {
-        formObject.participantId = result.participantId;
+      if (result.email) {
+        formObject.email = result.email;
       } else {
-        formObject.participantId = null;
+        formObject.email = null;
       }
 
       if (result.type) {
@@ -286,7 +280,6 @@ export class ChainParticipantComponent implements OnInit {
 
   resetForm(): void {
     this.myForm.setValue({
-      'participantId': null,
       'type': null,
       'name': null,
       'location': null,
