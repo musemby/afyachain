@@ -62,17 +62,7 @@
                   <input formControlName="ingredients" type="text" class="form-control">
                 
               </div>
-            
-          
-
-            
-              <div class="form-group text-left">
-                <label for="batches">batches</label>
-                
-                    <textarea formControlName="batches" class="form-control" rows="3"></textarea>
-                
-              </div>
-            
+                   
           
 
             
@@ -163,17 +153,6 @@
               
               
                 <input [ngModel]="ingredients"formControlName="ingredients" type="text" class="form-control">
-              
-
-            </div>
-          
-            <div class="form-group text-left">
-              <label for="batches">batches</label>
-              
-              
-                
-                  <textarea [ngModel]="batches" formControlName="batches" class="form-control" rows="3"></textarea>
-                
               
 
             </div>
@@ -285,9 +264,7 @@
                 <th class="info">mainIngredient</th>
             
                 <th class="info">ingredients</th>
-            
-                <th class="info">batches</th>
-            
+                        
                 <th class="info">owner</th>
             
                 <th class="info">created</th>
@@ -308,9 +285,7 @@
                 <td class="asset-properties">{{asset.mainIngredient}}</td>
             
                 <td class="asset-properties">{{asset.ingredients}}</td>
-            
-                <td class="asset-properties">{{asset.batches}}</td>
-            
+                        
                 <td class="asset-properties">{{asset.owner}}</td>
             
                 <td class="asset-properties">{{asset.created}}</td>

@@ -36,7 +36,6 @@ export class BrandComponent implements OnInit {
   name = new FormControl('', Validators.required);
   mainIngredient = new FormControl('', Validators.required);
   ingredients = new FormControl('', Validators.required);
-  batches = new FormControl('', Validators.required);
   owner = new FormControl('', Validators.required);
   created = new FormControl('', Validators.required);
   updated = new FormControl('', Validators.required);
@@ -47,7 +46,6 @@ export class BrandComponent implements OnInit {
       name: this.name,
       mainIngredient: this.mainIngredient,
       ingredients: this.ingredients,
-      batches: this.batches,
       owner: this.owner,
       created: this.created,
       updated: this.updated
@@ -112,7 +110,6 @@ export class BrandComponent implements OnInit {
       'name': this.name.value,
       'mainIngredient': this.mainIngredient.value,
       'ingredients': this.ingredients.value,
-      'batches': this.batches.value,
       'owner': this.owner.value,
       'created': this.created.value,
       'updated': this.updated.value
@@ -123,7 +120,6 @@ export class BrandComponent implements OnInit {
       'name': null,
       'mainIngredient': null,
       'ingredients': null,
-      'batches': null,
       'owner': null,
       'created': null,
       'updated': null
@@ -138,7 +134,6 @@ export class BrandComponent implements OnInit {
         'name': null,
         'mainIngredient': null,
         'ingredients': null,
-        'batches': null,
         'owner': null,
         'created': null,
         'updated': null
@@ -160,7 +155,6 @@ export class BrandComponent implements OnInit {
       'name': this.name.value,
       'mainIngredient': this.mainIngredient.value,
       'ingredients': this.ingredients.value,
-      'batches': this.batches.value,
       'owner': this.owner.value,
       'created': this.created.value,
       'updated': this.updated.value
@@ -216,7 +210,6 @@ export class BrandComponent implements OnInit {
         'name': null,
         'mainIngredient': null,
         'ingredients': null,
-        'batches': null,
         'owner': null,
         'created': null,
         'updated': null
@@ -244,12 +237,6 @@ export class BrandComponent implements OnInit {
         formObject.ingredients = result.ingredients;
       } else {
         formObject.ingredients = null;
-      }
-
-      if (result.batches) {
-        formObject.batches = result.batches;
-      } else {
-        formObject.batches = null;
       }
 
       if (result.owner) {
@@ -290,7 +277,6 @@ export class BrandComponent implements OnInit {
       'name': null,
       'mainIngredient': null,
       'ingredients': null,
-      'batches': null,
       'owner': null,
       'created': null,
       'updated': null
