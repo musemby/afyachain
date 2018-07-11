@@ -25,7 +25,7 @@ participant ChainParticipant identified by email {
   o String email
   o participantType type
   o String name
-  o String location
+  o String location optional
   o String phoneNumber
   o DateTime created
   o DateTime updated
@@ -42,7 +42,7 @@ asset Brand identified by brandId {
   o String brandId
   o String name
   o String mainIngredient
-  o String[] ingredients
+  o String[] ingredients optional
   --> ChainParticipant owner
   o DateTime created
   o DateTime updated
@@ -51,22 +51,21 @@ asset Brand identified by brandId {
 asset Batch identified by code {
   o String code
   o Brand brand
-  o Token token
   o DateTime expiryDate
-  o Unit[] units
+  --> Unit[] units optional
+  --> Token token
   --> ChainParticipant owner
-  --> ChainParticipant tempOwner
-  --> Batch parentBatch
+  --> ChainParticipant tempOwner optional
+  --> Batch parentBatch optional
   o DateTime created
   o DateTime updated
 }
 
 asset Unit identified by code {
   o String code
-  o String[] ownerIds
-  o Boolean sold
+  o Boolean sold default=false
   --> Batch batch
-  // --> Token token
+  --> Token token
   --> ChainParticipant tempOwner
   --> ChainParticipant owner
   o DateTime created
