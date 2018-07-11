@@ -50,7 +50,7 @@ asset Brand identified by brandId {
 
 asset Batch identified by code {
   o String code
-  o Brand brand
+  --> Brand brand
   o DateTime expiryDate
   --> Unit[] units optional
   --> Token token
