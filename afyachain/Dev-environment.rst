@@ -20,7 +20,7 @@ New tab
 
 
 // port 3000
-4. composer-rest-server -c admin@afyachain-network -n never -w true
+-. composer-rest-server -c admin@afyachain-network -n never -w true
 
 // port 4200 (angular app)
-5. npm start
+-. npm start
