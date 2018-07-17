@@ -16,6 +16,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { ChainParticipantService } from './ChainParticipant.service';
 import 'rxjs/add/operator/toPromise';
+import * as moment from 'moment'
 
 @Component({
   selector: 'app-chainparticipant',
@@ -37,8 +38,6 @@ export class ChainParticipantComponent implements OnInit {
   location = new FormControl('', Validators.required);
   phoneNumber = new FormControl('', Validators.required);
   email = new FormControl('', Validators.required);
-  created = new FormControl('', Validators.required);
-  updated = new FormControl('', Validators.required);
 
 
   constructor(private serviceChainParticipant: ChainParticipantService, fb: FormBuilder) {
@@ -47,9 +46,7 @@ export class ChainParticipantComponent implements OnInit {
       name: this.name,
       location: this.location,
       phoneNumber: this.phoneNumber,
-      email: this.email,
-      created: this.created,
-      updated: this.updated
+      email: this.email
     });
   };
 
@@ -111,8 +108,8 @@ export class ChainParticipantComponent implements OnInit {
       'location': this.location.value,
       'phoneNumber': this.phoneNumber.value,
       'email': this.email.value,
-      'created': this.created.value,
-      'updated': this.updated.value
+      'created': moment(),
+      'updated': moment()
     };
 
     this.myForm.setValue({
@@ -120,9 +117,7 @@ export class ChainParticipantComponent implements OnInit {
       'name': null,
       'location': null,
       'phoneNumber': null,
-      'email': null,
-      'created': null,
-      'updated': null
+      'email': null
     });
 
     return this.serviceChainParticipant.addParticipant(this.participant)
@@ -134,9 +129,7 @@ export class ChainParticipantComponent implements OnInit {
         'name': null,
         'location': null,
         'phoneNumber': null,
-        'email': null,
-        'created': null,
-        'updated': null
+        'email': null
       });
     })
     .catch((error) => {
@@ -157,8 +150,8 @@ export class ChainParticipantComponent implements OnInit {
       'location': this.location.value,
       'phoneNumber': this.phoneNumber.value,
       'email': this.email.value,
-      'created': this.created.value,
-      'updated': this.updated.value
+      'created': moment(),
+      'updated': moment()
     };
 
     return this.serviceChainParticipant.updateParticipant(form.get('email').value, this.participant)
@@ -211,9 +204,7 @@ export class ChainParticipantComponent implements OnInit {
         'name': null,
         'location': null,
         'phoneNumber': null,
-        'email': null,
-        'created': null,
-        'updated': null
+        'email': null
       };
 
       if (result.email) {
@@ -252,18 +243,6 @@ export class ChainParticipantComponent implements OnInit {
         formObject.email = null;
       }
 
-      if (result.created) {
-        formObject.created = result.created;
-      } else {
-        formObject.created = null;
-      }
-
-      if (result.updated) {
-        formObject.updated = result.updated;
-      } else {
-        formObject.updated = null;
-      }
-
       this.myForm.setValue(formObject);
     })
     .catch((error) => {
@@ -284,9 +263,7 @@ export class ChainParticipantComponent implements OnInit {
       'name': null,
       'location': null,
       'phoneNumber': null,
-      'email': null,
-      'created': null,
-      'updated': null
+      'email': null
     });
   }
 }

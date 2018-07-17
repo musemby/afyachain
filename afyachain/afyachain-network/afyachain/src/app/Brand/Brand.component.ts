@@ -14,6 +14,7 @@
 
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
+import { v4 as uuid4 } from 'uuid';
 import { BrandService } from './Brand.service';
 import 'rxjs/add/operator/toPromise';
 
@@ -106,7 +107,7 @@ export class BrandComponent implements OnInit {
   addAsset(form: any): Promise<any> {
     this.asset = {
       $class: 'org.afyachain.Brand',
-      'brandId': this.brandId.value,
+      'brandId': uuid4(),
       'name': this.name.value,
       'mainIngredient': this.mainIngredient.value,
       'ingredients': this.ingredients.value,
