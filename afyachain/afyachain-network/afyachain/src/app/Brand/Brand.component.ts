@@ -15,6 +15,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormGroup, FormControl, Validators, FormBuilder } from '@angular/forms';
 import { v4 as uuid4 } from 'uuid';
+import * as moment from 'moment';
 import { BrandService } from './Brand.service';
 import 'rxjs/add/operator/toPromise';
 
@@ -33,23 +34,15 @@ export class BrandComponent implements OnInit {
   private currentId;
   private errorMessage;
 
-  brandId = new FormControl('', Validators.required);
   name = new FormControl('', Validators.required);
   mainIngredient = new FormControl('', Validators.required);
   ingredients = new FormControl('', Validators.required);
-  owner = new FormControl('', Validators.required);
-  created = new FormControl('', Validators.required);
-  updated = new FormControl('', Validators.required);
 
   constructor(private serviceBrand: BrandService, fb: FormBuilder) {
     this.myForm = fb.group({
-      brandId: this.brandId,
       name: this.name,
       mainIngredient: this.mainIngredient,
       ingredients: this.ingredients,
-      owner: this.owner,
-      created: this.created,
-      updated: this.updated
     });
   };
 
@@ -111,19 +104,14 @@ export class BrandComponent implements OnInit {
       'name': this.name.value,
       'mainIngredient': this.mainIngredient.value,
       'ingredients': this.ingredients.value,
-      'owner': this.owner.value,
-      'created': this.created.value,
-      'updated': this.updated.value
+      'created': moment(),
+      'updated': moment()
     };
 
     this.myForm.setValue({
-      'brandId': null,
       'name': null,
       'mainIngredient': null,
-      'ingredients': null,
-      'owner': null,
-      'created': null,
-      'updated': null
+      'ingredients': null
     });
 
     return this.serviceBrand.addAsset(this.asset)
@@ -131,13 +119,9 @@ export class BrandComponent implements OnInit {
     .then(() => {
       this.errorMessage = null;
       this.myForm.setValue({
-        'brandId': null,
         'name': null,
         'mainIngredient': null,
         'ingredients': null,
-        'owner': null,
-        'created': null,
-        'updated': null
       });
     })
     .catch((error) => {
@@ -156,9 +140,7 @@ export class BrandComponent implements OnInit {
       'name': this.name.value,
       'mainIngredient': this.mainIngredient.value,
       'ingredients': this.ingredients.value,
-      'owner': this.owner.value,
-      'created': this.created.value,
-      'updated': this.updated.value
+      'updated': moment()
     };
 
     return this.serviceBrand.updateAsset(form.get('brandId').value, this.asset)
@@ -207,20 +189,10 @@ export class BrandComponent implements OnInit {
     .then((result) => {
       this.errorMessage = null;
       const formObject = {
-        'brandId': null,
         'name': null,
         'mainIngredient': null,
-        'ingredients': null,
-        'owner': null,
-        'created': null,
-        'updated': null
+        'ingredients': null
       };
-
-      if (result.brandId) {
-        formObject.brandId = result.brandId;
-      } else {
-        formObject.brandId = null;
-      }
 
       if (result.name) {
         formObject.name = result.name;
@@ -240,24 +212,6 @@ export class BrandComponent implements OnInit {
         formObject.ingredients = null;
       }
 
-      if (result.owner) {
-        formObject.owner = result.owner;
-      } else {
-        formObject.owner = null;
-      }
-
-      if (result.created) {
-        formObject.created = result.created;
-      } else {
-        formObject.created = null;
-      }
-
-      if (result.updated) {
-        formObject.updated = result.updated;
-      } else {
-        formObject.updated = null;
-      }
-
       this.myForm.setValue(formObject);
 
     })
@@ -274,13 +228,9 @@ export class BrandComponent implements OnInit {
 
   resetForm(): void {
     this.myForm.setValue({
-      'brandId': null,
       'name': null,
       'mainIngredient': null,
-      'ingredients': null,
-      'owner': null,
-      'created': null,
-      'updated': null
+      'ingredients': null
       });
   }
 

@@ -26,6 +26,7 @@ async function createBrand(createBrandTx) {
         ingredients: createBrandTx.ingredients,
         created: createBrandTx.created,
         updated: createBrandTx.updated,
+        owner: getCurrentParticipant()
     }
 
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
