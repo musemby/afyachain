@@ -1,2 +1,2 @@
 cd ~/personal/leproject/afyachain/afyachain-network
-composer-rest-server -c admin@afyachain-network -n never -w true
+composer-rest-server -p 4000 -c admin@afyachain-network -n never -w true
