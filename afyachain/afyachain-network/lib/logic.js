@@ -19,18 +19,46 @@ const biznet = 'org.afyachain';
 
 
 async function createBrand(createBrandTx) {
+    let ingredients = createBrandTx.ingredients.split(",");
+
     let newBrand = {
         brandId: createBrandTx.brandId,
         name: createBrandTx.name,
         mainIngredient: createBrandTx.mainIngredient,
-        ingredients: createBrandTx.ingredients,
+        ingredients: ingredients,
         created: createBrandTx.created,
         updated: createBrandTx.updated,
-        owner: getCurrentParticipant()
+        owner: getCurrentParticipant().getFullyQualifiedIdentifier()
     }
 
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.add(newBrand);
+}
+
+
+/**
+* Creates a token to be used by a batch or a unit
+* @param {org.afyachain.createToken} createTokenTx An instance of createToken transaction
+* @transaction
+*/
+async function createToken(createTokenTx) {
+    let code = Math.random() * 1000000000;
+    let newToken = {
+        code: code,
+        created: new Date(),
+        created: new Date()
+    };
+
+    let assetRegistry = await getAssetRegistry('org.afyachain.Token');
+    freshToken = await assetRegistry.add(newToken);
+    console.log(freshToken);
+    return freshToken
+}
+
+// TODO: Create batch transaction - check code is same as token.code
+
+async function currentParticipant() {
+    return getCurrentParticipant();
 }
 
 // dispatch a batch from one participant to another

@@ -34,8 +34,8 @@ participant ChainParticipant identified by email {
 
 asset Token identified by code{
   o String code
-  o DateTime created
-  o DateTime updated
+  o DateTime created optional
+  o DateTime updated optional
 }
 
 asset Brand identified by brandId {
@@ -66,7 +66,7 @@ asset Unit identified by code {
   o Boolean sold default=false
   --> Batch batch
   --> Token token
-  --> ChainParticipant tempOwner
+  --> ChainParticipant tempOwner optional
   --> ChainParticipant owner
   o DateTime created
   o DateTime updated
@@ -80,6 +80,13 @@ transaction createBrand {
   o ChainParticipant owner
   o DateTime created
   o DateTime updated
+}
+
+@returns(Token)
+transaction createToken {
+  o String code optional
+  o DateTime created optional
+  o DateTime updated optional
 }
 
 transaction DispatchBatch {
