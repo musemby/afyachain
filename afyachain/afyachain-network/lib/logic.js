@@ -14,9 +14,153 @@
 
 'use strict';
 
-const factory = getFactory();
 const biznet = 'org.afyachain';
 
+// const SECRET_PHRASE = "tEsYvQrANMcaoEhJQtGaHHTkxaMXLxMJCJZyfEAUxLobescpwvqRYftMxehonrPSjzaAVXLuWcrNDCRHdeGDXLOHhNXWpjZZtDCZbcaebmNgCaLxpvaDyMECVVeaUFDDVCqTmguvcvHMFCYnWlELrJ";
+let RANDOM_CODE = Math.floor(Math.random() * 1000000000)
+const SEED = "FbooNFTdVbfAETPHKwwgJFRSu";
+let SEQUENCE_NUMBER = 341;
+
+
+const stringTOASCII = function(value) {
+    return value.split('')
+                .map(
+                    function (char) {
+                       return char.charCodeAt(0);
+                 })
+                .reduce(
+                    function (curr, prev) {
+                        return prev + curr;
+                 });
+}
+
+
+// TODO: Find a sha1 lib to use here
+function _generate_code(data, type) {
+    if (type === 'Batch') {
+        let brand = data.brand;
+        let unitCount = data.unitCount;
+        let created = data.created;
+        let expiryDate = data.expiryDate;
+
+
+        let Q = RANDOM_CODE + brand + unitCount + created + expiryDate;
+        // let sha = crypto.createHash('sha1');
+        // sha.update(Q)
+        // let H64 = sha.digest('base64');
+
+        // for(i=0; i<SEQUENCE_NUMBER; i++) {
+        //     let ash = crypto.createHash('sha1');
+        //     H64 = ash.update(H64);
+        // }
+
+        return stringTOASCII(Q) * stringTOASCII(SEED);
+    } else if(type === 'Unit') {
+        let batch = data.batch;
+        let created = data.created;
+
+        let Q = RANDOM_CODE + batch + created;
+
+        return stringTOASCII(Q) * stringTOASCII(SEED);
+    }
+}
+
+
+/**
+* Creates a token to be used by a batch or a unit
+* @param {org.afyachain.createToken} createTokenTx An instance of createToken transaction
+* @transaction
+*/
+async function createToken(createTokenTx) {
+    let factory = getFactory();
+    let code = _generate_code();
+    let token = factory.newResource('org.afyachain', 'Token', String(code));
+    token.created = createTokenTx.created;
+    token.updated = createTokenTx.updated;
+
+    let assetRegistry = await getAssetRegistry('org.afyachain.Token');
+    await assetRegistry.add(token);
+    return token
+}
+
+
+/**
+* Creates a batch
+* @param {org.afyachain.createBatch} createBatchTx An instance of createBatch transaction
+* @transaction
+*/
+async function createBatch(batchTx) {
+    // get a code from the generator
+    let now = new Date();
+    let tokenData = {
+        brand: batchTx.brand,
+        unitCount: batchTx.unitCount,
+        created: now,
+        expiry: batchTx.expiryDate
+    }
+    let code = _generate_code(tokenData, 'Batch');
+
+    // create a new Batch token and add it to the registry
+    let factory = getFactory();
+    let token = factory.newResource('org.afyachain', 'Token', String(code));
+    token.created = now;
+    token.updated = now;
+
+    let tokenAssetRegistry = await getAssetRegistry('org.afyachain.Token');
+    await tokenAssetRegistry.add(token);
+
+    // create a batch using the token and code created above
+    let batch = factory.newResource('org.afyachain', 'Batch', token.code);
+    batch.brand = batchTx.brand;
+    batch.expiryDate = batchTx.expiryDate;
+    batch.token = token;
+    batch.owner = batchTx.owner;
+    batch.created = now;
+    batch.updated = now;
+
+    let batchAssetRegistry = await getAssetRegistry('org.afyachain.Batch');
+    await batchAssetRegistry.add(batch);
+
+    // update token  with new batch
+    let tokenAssetRegistry1 = await getAssetRegistry('org.afyachain.Token');
+    token.batch = batch;
+    tokenAssetRegistry1.update(token);
+
+    // CREATE UNITS
+    // get a code from the generator
+    for(i=0; i<batchTx.unitCount; i++) {
+        let unitTokenData = {
+        batch: batch,
+        created: now
+        };
+
+        let unitCode = _generate_code(unitTokenData, 'Unit');
+        // create a new Unit token and add it to the registry
+        let unitToken = factory.newResource('org.afyachain', 'Token', String(unitCode));
+        unitToken.created = now;
+        unitToken.updated = now;
+
+        let tokenAssetRegistry2 = await getAssetRegistry('org.afyachain.Token');
+        await tokenAssetRegistry2.add(unitToken);
+
+        // create units
+        let unit = factory.newResource('org.afyachain', 'Unit', String(unitToken.code));
+        unit.batch = batch;
+        unit.token = unitToken;
+        unit.owner = batchTx.owner;
+        unit.created = now;
+        unit.updated = now;
+
+        let unitAssetRegistry = await getAssetRegistry('org.afyachain.Unit');
+        await unitAssetRegistry.add(unit);
+        }
+
+        // update batch with unit
+
+        // update token with unit
+
+        return batch
+}
 
 async function createBrand(createBrandTx) {
     let ingredients = createBrandTx.ingredients.split(",");
@@ -36,24 +180,20 @@ async function createBrand(createBrandTx) {
 }
 
 
-/**
-* Creates a token to be used by a batch or a unit
-* @param {org.afyachain.createToken} createTokenTx An instance of createToken transaction
-* @transaction
-*/
-async function createToken(createTokenTx) {
-    let code = Math.random() * 1000000000;
-    let newToken = {
-        code: code,
-        created: new Date(),
-        created: new Date()
-    };
+async function generateToken(type) {
+    let factory = getFactory();
+    let code = Math.floor(Math.random() * 1000000000);
+    let token = factory.newResource('org.afyachain', 'Token', String(code));
+    token.created = new Date();
+    token.updated = new Date();
 
     let assetRegistry = await getAssetRegistry('org.afyachain.Token');
-    freshToken = await assetRegistry.add(newToken);
-    console.log(freshToken);
-    return freshToken
+    await assetRegistry.add(token);
+    return token
 }
+
+
+// TODO: Is expiry date determinable beforehand?
 
 // TODO: Create batch transaction - check code is same as token.code
 
@@ -148,6 +288,7 @@ async function splitBatch(splitBatchTx) {
     now = now.toISOString();
 
     // TODO: auto incrementing strategy for ids
+    let factory = getFactory();
     let subBatch = factory.newAsset('org.afyachain', 'Batch', '67');
     subBatch.parentBatch = parentBatch;
     subBatch.brand = parentBatch.brand;

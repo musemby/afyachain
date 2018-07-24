@@ -34,8 +34,10 @@ participant ChainParticipant identified by email {
 
 asset Token identified by code{
   o String code
-  o DateTime created optional
-  o DateTime updated optional
+  o Batch batch optional
+  o Unit unit optional
+  o DateTime created
+  o DateTime updated
 }
 
 asset Brand identified by brandId {
@@ -72,14 +74,25 @@ asset Unit identified by code {
   o DateTime updated
 }
 
+@returns(Batch)
+transaction createBatch {
+  --> Brand brand
+  o DateTime expiryDate
+  o Integer unitCount
+  --> Unit[] units optional
+  --> ChainParticipant owner
+  --> ChainParticipant tempOwner optional
+  --> Batch parentBatch optional
+}
+
 transaction createBrand {
-  o String brandId
+  o String brandId optional
   o String name
   o String mainIngredient
-  o String[] ingredients
-  o ChainParticipant owner
-  o DateTime created
-  o DateTime updated
+  o String[] ingredients optional
+  --> ChainParticipant owner
+  o DateTime created optional
+  o DateTime updated optional
 }
 
 @returns(Token)
