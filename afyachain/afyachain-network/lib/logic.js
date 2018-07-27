@@ -17,7 +17,6 @@
 const biznet = 'org.afyachain';
 
 // const SECRET_PHRASE = "tEsYvQrANMcaoEhJQtGaHHTkxaMXLxMJCJZyfEAUxLobescpwvqRYftMxehonrPSjzaAVXLuWcrNDCRHdeGDXLOHhNXWpjZZtDCZbcaebmNgCaLxpvaDyMECVVeaUFDDVCqTmguvcvHMFCYnWlELrJ";
-let RANDOM_CODE = Math.floor(Math.random() * 1000000000)
 const SEED = "FbooNFTdVbfAETPHKwwgJFRSu";
 let SEQUENCE_NUMBER = 341;
 
@@ -43,8 +42,9 @@ function _generate_code(data, type) {
         let created = data.created;
         let expiryDate = data.expiryDate;
 
-
+        let RANDOM_CODE = Math.floor(Math.random() * 1000000000);
         let Q = RANDOM_CODE + brand + unitCount + created + expiryDate;
+        let randTwo = String(Math.floor(Math.random() * 10000000));
         // let sha = crypto.createHash('sha1');
         // sha.update(Q)
         // let H64 = sha.digest('base64');
@@ -54,14 +54,16 @@ function _generate_code(data, type) {
         //     H64 = ash.update(H64);
         // }
 
-        return stringTOASCII(Q) * stringTOASCII(SEED);
+        return (stringTOASCII(Q) * stringTOASCII(SEED)) + stringTOASCII(randTwo);
     } else if(type === 'Unit') {
         let batch = data.batch;
         let created = data.created;
+        let RANDOM_CODE = Math.floor(Math.random() * 1000000000);
 
         let Q = RANDOM_CODE + batch + created;
+        let randTwo = String(Math.floor(Math.random() * 10000000));
 
-        return stringTOASCII(Q) * stringTOASCII(SEED);
+        return (stringTOASCII(Q) * stringTOASCII(SEED)) + stringTOASCII(randTwo);
     }
 }
 
@@ -91,6 +93,9 @@ async function createToken(createTokenTx) {
 */
 async function createBatch(batchTx) {
     // get a code from the generator
+    let tokenAssetRegistry = await getAssetRegistry('org.afyachain.Token');
+    let batchAssetRegistry = await getAssetRegistry('org.afyachain.Batch');
+    let unitAssetRegistry = await getAssetRegistry('org.afyachain.Unit');
     let now = new Date();
     let tokenData = {
         brand: batchTx.brand,
@@ -106,7 +111,6 @@ async function createBatch(batchTx) {
     token.created = now;
     token.updated = now;
 
-    let tokenAssetRegistry = await getAssetRegistry('org.afyachain.Token');
     await tokenAssetRegistry.add(token);
 
     // create a batch using the token and code created above
@@ -118,16 +122,15 @@ async function createBatch(batchTx) {
     batch.created = now;
     batch.updated = now;
 
-    let batchAssetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await batchAssetRegistry.add(batch);
 
     // update token  with new batch
-    let tokenAssetRegistry1 = await getAssetRegistry('org.afyachain.Token');
     token.batch = batch;
-    tokenAssetRegistry1.update(token);
+    tokenAssetRegistry.update(token);
 
-    // CREATE UNITS
+        // CREATE UNITS
     // get a code from the generator
+    let unitsToCreate = [];
     for(i=0; i<batchTx.unitCount; i++) {
         let unitTokenData = {
         batch: batch,
@@ -140,8 +143,7 @@ async function createBatch(batchTx) {
         unitToken.created = now;
         unitToken.updated = now;
 
-        let tokenAssetRegistry2 = await getAssetRegistry('org.afyachain.Token');
-        await tokenAssetRegistry2.add(unitToken);
+        await tokenAssetRegistry.add(unitToken);
 
         // create units
         let unit = factory.newResource('org.afyachain', 'Unit', String(unitToken.code));
@@ -151,15 +153,20 @@ async function createBatch(batchTx) {
         unit.created = now;
         unit.updated = now;
 
-        let unitAssetRegistry = await getAssetRegistry('org.afyachain.Unit');
-        await unitAssetRegistry.add(unit);
+        unitsToCreate.push(unit);
+        console.log('@debug i=',i, 'unitCount=', batchTx.unitCount, 'array=', unitsToCreate.length);
         }
 
         // update batch with unit
 
         // update token with unit
+        console.log('@debug outside for loop: ', unitsToCreate.length);
+        await unitAssetRegistry.addAll(unitsToCreate);
+        // update batch with unit
 
-        return batch
+        // update token with unit
+
+        return batch;
 }
 
 async function createBrand(createBrandTx) {
