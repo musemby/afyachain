@@ -116,6 +116,7 @@ async function createBatch(batchTx) {
     // create a batch using the token and code created above
     let batch = factory.newResource('org.afyachain', 'Batch', token.code);
     batch.brand = batchTx.brand;
+    batch.unitCount = batchTx.unitCount;
     batch.expiryDate = batchTx.expiryDate;
     batch.token = token;
     batch.owner = batchTx.owner;

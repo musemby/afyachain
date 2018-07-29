@@ -21,6 +21,29 @@ enum participantType {
   o RETAILER
 }
 
+enum brandStatus {
+  o ACTIVE
+  o DEACTIVATED
+}
+
+enum batchStatus {
+  o PRODUCED
+  o SUPPLIER_DISPATCHED
+  o SUPPLIER_RECEIVED
+  o RETAILER_DISPATCHED
+  o RETAILER_RECEIVED
+  o SOLD
+}
+
+enum unitStatus {
+  o PRODUCED
+  o SUPPLIER_DISPATCHED
+  o SUPPLIER_RECEIVED
+  o RETAILER_DISPATCHED
+  o RETAILER_RECEIVED
+  o SOLD
+}
+
 participant ChainParticipant identified by email {
   o String email
   o participantType type
@@ -43,6 +66,7 @@ asset Token identified by code{
 asset Brand identified by brandId {
   o String brandId
   o String name
+  o brandStatus status default='ACTIVE'
   o String mainIngredient
   o String[] ingredients optional
   --> ChainParticipant owner
@@ -52,8 +76,10 @@ asset Brand identified by brandId {
 
 asset Batch identified by code {
   o String code
+  o batchStatus status default='PRODUCED'
   --> Brand brand
   o DateTime expiryDate
+  o Integer unitCount
   --> Unit[] units optional
   --> Token token
   --> ChainParticipant owner
@@ -65,8 +91,9 @@ asset Batch identified by code {
 
 asset Unit identified by code {
   o String code
+  o unitStatus status default='PRODUCED'
   o Boolean sold default=false
-  --> Batch batch
+    --> Batch batch
   --> Token token
   --> ChainParticipant tempOwner optional
   --> ChainParticipant owner
