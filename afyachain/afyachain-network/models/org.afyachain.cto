@@ -78,6 +78,7 @@ asset Batch identified by code {
   o String code
   o batchStatus status default='PRODUCED'
   --> Brand brand
+  o DateTime manufactureDate
   o DateTime expiryDate
   o Integer unitCount
   --> Unit[] units optional
@@ -104,6 +105,7 @@ asset Unit identified by code {
 @returns(Batch)
 transaction createBatch {
   --> Brand brand
+  o DateTime manufactureDate
   o DateTime expiryDate
   o Integer unitCount
   --> Unit[] units optional
