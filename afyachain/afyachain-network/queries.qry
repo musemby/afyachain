@@ -1,0 +1,5 @@
+// query selectUnitsByBatch {
+//   description: "Fetch units belonging to a batch"
+//   statement:
+//   SELECT org.Afyachain.Unit
+// }

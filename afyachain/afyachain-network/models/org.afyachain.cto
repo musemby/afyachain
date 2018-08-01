@@ -28,6 +28,7 @@ enum brandStatus {
 
 enum batchStatus {
   o PRODUCED
+  o CODE_PRINTED
   o SUPPLIER_DISPATCHED
   o SUPPLIER_RECEIVED
   o RETAILER_DISPATCHED
@@ -37,6 +38,7 @@ enum batchStatus {
 
 enum unitStatus {
   o PRODUCED
+  o CODE_PRINTED
   o SUPPLIER_DISPATCHED
   o SUPPLIER_RECEIVED
   o RETAILER_DISPATCHED
