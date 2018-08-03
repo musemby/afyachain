@@ -114,6 +114,7 @@ transaction createBatch {
   --> ChainParticipant owner
   --> ChainParticipant tempOwner optional
   --> Batch parentBatch optional
+  o DateTime created
 }
 
 transaction createBrand {
@@ -133,22 +134,15 @@ transaction createToken {
   o DateTime updated optional
 }
 
+// states play a major role here(strong validation)
+// MANUFACTURER
 transaction DispatchBatch {
   --> Batch batch
   --> ChainParticipant recipient
   o DateTime dispatchedOn
 }
 
-transaction SplitBatch {
-  --> Batch parentBatch
-  o Integer quantity
-}
-
-transaction SellUnit {
-  --> Unit unit
-  o DateTime soldOn
-}
-
+// SUPPLIER
 transaction VerifyBatch {
   o String code
   o DateTime verifiedOn
@@ -159,6 +153,11 @@ transaction ReceiveBatch {
   o DateTime receivedOn
 }
 
+transaction SellUnit {
+  --> Unit unit
+  o DateTime soldOn
+}
+
 transaction VerifyUnit {
   o String code
   o DateTime verifiedOn
@@ -167,4 +166,10 @@ transaction VerifyUnit {
 transaction ReceiveUnit {
   --> Unit unit
   o DateTime receivedOn
+}
+
+// Put a pin in it
+transaction SplitBatch {
+  --> Batch parentBatch
+  o Integer quantity
 }

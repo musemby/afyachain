@@ -96,11 +96,11 @@ async function createBatch(batchTx) {
     let tokenAssetRegistry = await getAssetRegistry('org.afyachain.Token');
     let batchAssetRegistry = await getAssetRegistry('org.afyachain.Batch');
     let unitAssetRegistry = await getAssetRegistry('org.afyachain.Unit');
-    let now = new Date();
+
     let tokenData = {
         brand: batchTx.brand,
         unitCount: batchTx.unitCount,
-        created: now,
+        created: batchTx.created,
         expiry: batchTx.expiryDate
     }
     let code = _generate_code(tokenData, 'Batch');
@@ -108,8 +108,8 @@ async function createBatch(batchTx) {
     // create a new Batch token and add it to the registry
     let factory = getFactory();
     let token = factory.newResource('org.afyachain', 'Token', String(code));
-    token.created = now;
-    token.updated = now;
+    token.created = batchTx.created;
+    token.updated = batchTx.created;
 
     await tokenAssetRegistry.add(token);
 
@@ -121,8 +121,8 @@ async function createBatch(batchTx) {
     batch.expiryDate = batchTx.expiryDate;
     batch.token = token;
     batch.owner = batchTx.owner;
-    batch.created = now;
-    batch.updated = now;
+    batch.created = batchTx.created;
+    batch.updated = batchTx.created;
 
     await batchAssetRegistry.add(batch);
 
@@ -136,14 +136,14 @@ async function createBatch(batchTx) {
     for(i=0; i<batchTx.unitCount; i++) {
         let unitTokenData = {
         batch: batch,
-        created: now
+        created: batchTx.created
         };
 
         let unitCode = _generate_code(unitTokenData, 'Unit');
         // create a new Unit token and add it to the registry
         let unitToken = factory.newResource('org.afyachain', 'Token', String(unitCode));
-        unitToken.created = now;
-        unitToken.updated = now;
+        unitToken.created = batchTx.created;
+        unitToken.updated = batchTx.created;
 
         await tokenAssetRegistry.add(unitToken);
 
@@ -152,8 +152,8 @@ async function createBatch(batchTx) {
         unit.batch = batch;
         unit.token = unitToken;
         unit.owner = batchTx.owner;
-        unit.created = now;
-        unit.updated = now;
+        unit.created = batchTx.created;
+        unit.updated = batchTx.created;
 
         unitsToCreate.push(unit);
         console.log('@debug i=',i, 'unitCount=', batchTx.unitCount, 'array=', unitsToCreate.length);
