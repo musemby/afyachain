@@ -69,6 +69,7 @@ asset Brand identified by brandId {
   o String brandId
   o String name
   o brandStatus status default='ACTIVE'
+  // maybe pharmaceuticalForm
   o String mainIngredient
   o String[] ingredients optional
   --> ChainParticipant owner

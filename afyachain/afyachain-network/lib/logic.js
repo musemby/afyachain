@@ -210,16 +210,20 @@ async function currentParticipant() {
     return getCurrentParticipant();
 }
 
-// dispatch a batch from one participant to another
+/**
+* Dispatches a batch
+* @param {org.afyachain.DispatchBatch} dispatchBatchTx An instance of dispatchBatch transaction
+* @transaction
+*/
 async function dispatchBatch(dispatchBatchTx) {
     let batch = dispatchBatchTx.batch;
     let recipient = dispatchBatchTx.recipient;
     let dispatchedOn = dispatchBatchTx.dispatchedOn;
 
     // TODO: Add validations
-
     batch.tempOwner = recipient;
     batch.updated = dispatchedOn;
+    batch.status = 'SUPPLIER_DISPATCHED';
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.update(batch);
 }
