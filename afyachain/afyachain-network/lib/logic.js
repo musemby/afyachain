@@ -210,18 +210,41 @@ async function currentParticipant() {
     return getCurrentParticipant();
 }
 
-// dispatch a batch from one participant to another
+/**
+* Dispatches a batch
+* @param {org.afyachain.DispatchBatch} dispatchBatchTx An instance of dispatchBatch transaction
+* @transaction
+*/
 async function dispatchBatch(dispatchBatchTx) {
     let batch = dispatchBatchTx.batch;
     let recipient = dispatchBatchTx.recipient;
     let dispatchedOn = dispatchBatchTx.dispatchedOn;
 
-    // TODO: Add validations
+    // TODO: Validate only an owner of the current
+    // TODO: Validate the batch is not empty
+    // TODO: Validate that the recipient is not a MANUFACTURER
+
+    // Validate that the batch is in PRODUCED state
+    if (batch.status != 'PRODUCED') {
+        throw Error('The batch has to be in PRODUCED status for it to be dispatched.');
+    }
 
     batch.tempOwner = recipient;
     batch.updated = dispatchedOn;
+    batch.status = 'SUPPLIER_DISPATCHED';
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.update(batch);
+
+    let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
+    let batchUnits = await query('getUnitsByBatch', { batch: batch.toURI()});
+    console.log('@debug ', batch.toURI());
+    console.log('@debug ', batchUnits.length);
+    for (each of batchUnits) {
+        each.setPropertyValue('status', 'SUPPLIER_DISPATCHED')
+    }
+
+    await unitRegistry.updateAll(batchUnits);
+    
 }
 
 // sell a unit
