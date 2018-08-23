@@ -15,6 +15,7 @@
 'use strict';
 
 const biznet = 'org.afyachain';
+var currentParticipant = getCurrentParticipant();
 
 // const SECRET_PHRASE = "tEsYvQrANMcaoEhJQtGaHHTkxaMXLxMJCJZyfEAUxLobescpwvqRYftMxehonrPSjzaAVXLuWcrNDCRHdeGDXLOHhNXWpjZZtDCZbcaebmNgCaLxpvaDyMECVVeaUFDDVCqTmguvcvHMFCYnWlELrJ";
 const SEED = "FbooNFTdVbfAETPHKwwgJFRSu";
@@ -226,7 +227,7 @@ async function dispatchBatch(dispatchBatchTx) {
 
     // Validate that the batch is in PRODUCED state
     if (batch.status != 'PRODUCED') {
-        throw Error('The batch has to be in PRODUCED status for it to be dispatched.');
+        throw new Error('The batch has to be in PRODUCED status for it to be dispatched.');
     }
 
     batch.tempOwner = recipient;
@@ -258,19 +259,39 @@ async function sellUnit(sellUnitTx) {
 };
 
 
-async function verifyBatch(verifyBatchTx) {
-    let code = verifyBatchTx.code;
+/**
+* Dispatches a batch
+* @param {org.afyachain.VerifyBatch} tx An instance of VerifyBatch transaction
+* @transaction
+*/
+async function verifyBatch(tx) {
+    let code = tx.code;
     // TODO: add batch verifying logic
-    let verifiedOn = verifyBatchTx.verifiedOn;
+    let verifiedOn = tx.verifiedOn;
     let assetRegistry = await getAssetRegistry(biznet + '.Batch');
-    await assetRegistry.get(code);
+    let batch = await assetRegistry.get(code);
+    if (batch.status != 'SUPPLIER_DISPATCHED') {
+        throw new Error('The batch has not been dispatched to this supplier yet');
+    }
+    if (batch.expiryDate < tx.verifiedOn) {
+        throw new Error('The batch entered is already expired');
+    }
+    // if (batch.tempOwner != currentParticipant.toURI()) {
+    //     throw new Error('The batch has not been dispatched to this supplier yet');
+    // }
+    batch.owner = currentParticipant.toURI();
+    console.log("@debug ", batch.owner);
+    batch.tempOwner = null;
+    batch.status = 'SUPPLIER_RECEIVED';
+    await assetRegistry.update(batch);
+
 }
 
-
 async function receiveBatch(receiveBatchTx) {
+    // TODO: Change ownership of the batch and the status
+
     let batch = receiveBatchTx.batch;
     let receivedOn = receiveBatchTx.receivedOn;
-    var currentParticipant = getCurrentParticipant();
 
     if (batch.tempOwner.participantId == currentParticipant.participantId) {
         batch.owner = currentParticipant;
@@ -279,7 +300,7 @@ async function receiveBatch(receiveBatchTx) {
         let assetRegistry = await getAssetRegistry(biznet + '.Batch');
         assetRegistry.update(batch);
     } else {
-        throw "The batch was not intended for this participant";
+        throw new Error("The batch was not intended for this participant");
     }
 };
 
