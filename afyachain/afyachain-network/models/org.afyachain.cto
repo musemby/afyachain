@@ -52,6 +52,7 @@ participant ChainParticipant identified by email {
   o String name
   o String location optional
   o String phoneNumber
+  o String password
   o DateTime created
   o DateTime updated
 }
@@ -133,6 +134,18 @@ transaction createToken {
   o String code optional
   o DateTime created optional
   o DateTime updated optional
+}
+
+@returns(ChainParticipant)
+transaction createChainParticipant {
+  o String email
+  o participantType type
+  o String name
+  o String location optional
+  o String phoneNumber
+  o String password
+  o DateTime created
+  o DateTime updated
 }
 
 // states play a major role here(strong validation)
