@@ -14,7 +14,6 @@
 
 namespace org.afyachain
 
-
 enum participantType {
   o MANUFACTURER
   o SUPPLIER
@@ -46,21 +45,25 @@ enum unitStatus {
   o SOLD
 }
 
+//----------------------------Assets----------------------------------------------------------
+
+asset Token identified by code {
+  o String code
+  o Batch batch optional
+  o Unit unit optional
+  o DateTime created
+  o DateTime updated
+  --> ChainParticipant createdBy
+  --> ChainParticipant updatedBy
+}
+
 participant ChainParticipant identified by email {
   o String email
   o participantType type
   o String name
   o String location optional
   o String phoneNumber
-  o DateTime created
-  o DateTime updated
-}
-
-
-asset Token identified by code{
-  o String code
-  o Batch batch optional
-  o Unit unit optional
+  o String password
   o DateTime created
   o DateTime updated
 }
@@ -75,6 +78,8 @@ asset Brand identified by brandId {
   --> ChainParticipant owner
   o DateTime created
   o DateTime updated
+  --> ChainParticipant createdBy
+  --> ChainParticipant updatedBy
 }
 
 asset Batch identified by code {
@@ -91,6 +96,8 @@ asset Batch identified by code {
   --> Batch parentBatch optional
   o DateTime created
   o DateTime updated
+  --> ChainParticipant createdBy
+  --> ChainParticipant updatedBy
 }
 
 asset Unit identified by code {
@@ -103,7 +110,11 @@ asset Unit identified by code {
   --> ChainParticipant owner
   o DateTime created
   o DateTime updated
+  --> ChainParticipant createdBy
+  --> ChainParticipant updatedBy
 }
+
+// -----------------------------Transactions-----------------------------------------------------
 
 @returns(Batch)
 transaction createBatch {
@@ -116,6 +127,7 @@ transaction createBatch {
   --> ChainParticipant tempOwner optional
   --> Batch parentBatch optional
   o DateTime created
+  --> ChainParticipant user
 }
 
 transaction createBrand {
@@ -126,6 +138,7 @@ transaction createBrand {
   --> ChainParticipant owner
   o DateTime created optional
   o DateTime updated optional
+  --> ChainParticipant user
 }
 
 @returns(Token)
@@ -133,6 +146,25 @@ transaction createToken {
   o String code optional
   o DateTime created optional
   o DateTime updated optional
+  --> ChainParticipant user
+}
+
+@returns(ChainParticipant)
+transaction createChainParticipant {
+  o String email
+  o participantType type
+  o String name
+  o String location optional
+  o String phoneNumber
+  o String password
+  o DateTime created
+  o DateTime updated
+}
+
+@returns(ChainParticipant)
+transaction logIn {
+  o String email
+  o String password
 }
 
 // states play a major role here(strong validation)
@@ -141,36 +173,43 @@ transaction DispatchBatch {
   --> Batch batch
   --> ChainParticipant recipient
   o DateTime dispatchedOn
+  --> ChainParticipant user
 }
 
 // SUPPLIER
 transaction VerifyBatch {
   o String code
   o DateTime verifiedOn
+  --> ChainParticipant user
 }
 
 transaction ReceiveBatch {
   --> Batch batch
   o DateTime receivedOn
+  --> ChainParticipant user
 }
 
 transaction SellUnit {
   --> Unit unit
   o DateTime soldOn
+  --> ChainParticipant user
 }
 
 transaction VerifyUnit {
   o String code
   o DateTime verifiedOn
+  --> ChainParticipant user
 }
 
 transaction ReceiveUnit {
   --> Unit unit
   o DateTime receivedOn
+  --> ChainParticipant user
 }
 
 // Put a pin in it
 transaction SplitBatch {
   --> Batch parentBatch
   o Integer quantity
+  --> ChainParticipant user
 }
