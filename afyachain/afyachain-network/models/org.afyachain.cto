@@ -104,7 +104,7 @@ asset Unit identified by code {
   o String code
   o unitStatus status default='PRODUCED'
   o Boolean sold default=false
-    --> Batch batch
+  --> Batch batch
   --> Token token
   --> ChainParticipant tempOwner optional
   --> ChainParticipant owner
