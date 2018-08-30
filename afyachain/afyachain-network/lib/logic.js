@@ -249,6 +249,8 @@ async function dispatchBatch(dispatchBatchTx) {
     let dispatchedOn = dispatchBatchTx.dispatchedOn;
     let user = dispatchBatchTx.user;
 
+    let batchUnits = await query('getUnitsByBatch', { batch: batch.toURI()});
+
     if (batch.owner.toURI() != user.toURI()) {
         throw new Error('The batch does not belong to the current user')
     }
@@ -257,7 +259,7 @@ async function dispatchBatch(dispatchBatchTx) {
         throw new Error('The batch has to be in PRODUCED status for it to be dispatched.');
     }
 
-    if (user.type == 'MANUFACTURER') {
+    if (recipient.type == 'MANUFACTURER') {
         throw new Error('A batch cannot be dispatched to a manufacturer')
     }
 
@@ -273,10 +275,9 @@ async function dispatchBatch(dispatchBatchTx) {
     await assetRegistry.update(batch);
     
     let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
-    let batchUnits = await query('getUnitsByBatch', { batch: batch.toURI()});
     for (each of batchUnits) {
-        each.setPropertyValue('status', 'SUPPLIER_DISPATCHED');
-        each.setPropertyValue('tempOwner', recipient);
+        each.status = 'SUPPLIER_DISPATCHED';
+        each.tempOwner = recipient;
     }
     await unitRegistry.updateAll(batchUnits);
 }
@@ -293,7 +294,7 @@ async function sellUnit(sellUnitTx) {
 
 
 /**
- * Dispatches a batch
+ * Verifies a batch
  * @param {org.afyachain.VerifyBatch} tx An instance of VerifyBatch transaction
  * @transaction
  */
@@ -322,6 +323,40 @@ async function verifyBatch(tx) {
         
     }
 
+/**
+ * Verifies a batch
+ * @param {org.afyachain.VerifyUnit} tx An instance of VerifyUnit transaction
+ * @transaction
+ */
+async function verifyUnit(tx) {
+    // TODO alert if there are some unconfirmed units that were dispatched
+    let unitCode = tx.code;
+    let batchCode = tx.batchCode;
+    let verifiedOn = tx.verifiedOn;
+    let user = tx.user;
+
+    let batchRegistry = await getAssetRegistry(biznet + '.Batch');
+    let batch = await batchRegistry.get(batchCode);
+
+
+    let assetRegistry = await getAssetRegistry(biznet + '.Unit');
+    let unit = await assetRegistry.get(unitCode);
+    console.log('@debug tempowner', unit.tempOwner.toURI());
+    console.log('@debug user', user.toURI());
+    if (unit.batch.toURI() != batch.toURI()) {
+        throw new Error('This unit was not dispatched as part of this batch');
+    }
+    if (unit.tempOwner.toURI() != user.toURI()) {
+        throw new Error('This unit has not been dispatched to this user yet');
+    }
+
+    unit.owner = user;
+    unit.tempOwner = null;
+
+    let unitAssetRegistry = await getAssetRegistry(biznet + '.Unit');
+    await unitAssetRegistry.update(unit);
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function receiveBatch(receiveBatchTx) {
         // TODO: Change ownership of the batch and the status
@@ -338,30 +373,6 @@ async function verifyBatch(tx) {
         } else {
             throw new Error("This batch was not intended for this participant");
         }
-    };
-    
-    async function verifyUnit(tx) {
-        // TODO alert if there are some unconfirmed units that were dispatched
-        let unitCode = tx.unitCode;
-        let batchCode = tx.batchCode;
-        let verifiedOn = tx.verifiedOn;
-        let user = tx.user;
-        
-        let assetRegistry = await getAssetRegistry(biznet + '.Unit');
-        let unit = await assetRegistry.get(code);
-
-        if (unit.batch.code != batch.code) {
-            throw new Error('This unit was not dispatched as part of this batch');
-        }
-        if (unit.tempOwner.toURI() != user.toURI()) {
-            throw new Error('This unit has not been dispatched to this user yet');
-        }
-
-        unit.owner = currentParticipant;
-        unit.tempOwner = null;
-
-        let unitAssetRegistry = await getAssetRegistry(biznet + '.Unit');
-        await unitAssetRegistry.update(unit);
     };
 
     async function receiveUnit(receiveUnitTx) {

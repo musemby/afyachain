@@ -197,6 +197,7 @@ transaction SellUnit {
 
 transaction VerifyUnit {
   o String code
+  o String batchCode
   o DateTime verifiedOn
   --> ChainParticipant user
 }
