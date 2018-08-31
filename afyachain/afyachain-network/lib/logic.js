@@ -262,8 +262,7 @@ async function dispatchBatch(dispatchBatchTx) {
     if (batch.owner.toURI() != user.toURI()) {
         throw new Error('The batch does not belong to the current user')
     }
-    console.log('@debug user', user)
-    console.log('@debug usertype', user.type)
+
     let req_state = 'infared'
     let new_state = 'infared'
     if (user.type == 'MANUFACTURER') {
@@ -327,11 +326,24 @@ async function verifyBatch(tx) {
     let verifiedOn = tx.verifiedOn;
     let assetRegistry = await getAssetRegistry(biznet + '.Batch');
     let batch = await assetRegistry.get(code);
-    if (batch.status != 'SUPPLIER_DISPATCHED') {
+
+    let req_state = 'infared'
+    let new_state = 'infared'
+    if (tx.user.type == 'SUPPLIER') {
+        req_state = 'SUPPLIER_DISPATCHED';
+        new_state = 'SUPPLIER_RECEIVED';
+    } else if (tx.user.type == 'RETAILER') {
+        req_state = 'RETAILER_DISPATCHED';
+        new_state = 'RETAILER_RECEIVED';
+    } else {
+        throw new Error('Only a RETAILER or SUPPLIER is allowed to receive a batch');
+    }
+
+    if (batch.status != req_state) {
         throw new Error('This batch has not been dispatched to this user yet');
     }
     if (batch.expiryDate < tx.verifiedOn) {
-        throw new Error('This batch entered is already expired');
+        throw new Error('This batch is already expired');
     }
 
     if (batch.tempOwner.toURI() != tx.user.toURI()) {
@@ -341,7 +353,7 @@ async function verifyBatch(tx) {
     batch.updated = verifiedOn;
     batch.updatedBy = tx.user;
     batch.tempOwner = null;
-    batch.status = 'SUPPLIER_RECEIVED';
+    batch.status = new_state;RETAILER_DISPATCHED
     await assetRegistry.update(batch);
         
     }
@@ -361,7 +373,6 @@ async function verifyUnit(tx) {
     let batchRegistry = await getAssetRegistry(biznet + '.Batch');
     let batch = await batchRegistry.get(batchCode);
 
-
     let assetRegistry = await getAssetRegistry(biznet + '.Unit');
     let unit = await assetRegistry.get(unitCode);
     console.log('@debug tempowner', unit.tempOwner.toURI());
@@ -373,6 +384,14 @@ async function verifyUnit(tx) {
         throw new Error('This unit has not been dispatched to this user yet');
     }
 
+    let new_state = 'infared';
+    if (unit.status == 'RETAILER_DISPATCHED') {
+        new_state = 'RETAILER_RECEIVED';
+    } else if (unit.status == 'SUPPLIER_DISPATCHED') {
+        new_state = 'SUPPLIER_RECEIVED';
+    }
+
+    unit.status = new_state;
     unit.owner = user;
     unit.tempOwner = null;
 
