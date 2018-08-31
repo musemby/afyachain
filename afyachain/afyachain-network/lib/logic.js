@@ -31,6 +31,15 @@ function sha1(msg) {
     return tohex(H0) + tohex(H1) + tohex(H2) + tohex(H3) + tohex(H4);
 }
 
+// add python style {}.format to strings
+String.prototype.format = function () {
+    var a = this;
+    for (var k in arguments) {
+        a = a.replace(new RegExp("\\{" + k + "\\}", 'g'), arguments[k]);
+    }
+    return a
+}
+
 const stringTOASCII = function(value) {
     return value.split('')
                 .map(
@@ -218,7 +227,6 @@ async function createBatch(batchTx) {
 */
 async function createBrand(createBrandTx) {
     let ingredients = createBrandTx.ingredients.split(",");
-    console.log('@debug ', createBrandTx.createdBy)
     let newBrand = {
         brandId: createBrandTx.brandId,
         name: createBrandTx.name,
@@ -254,9 +262,23 @@ async function dispatchBatch(dispatchBatchTx) {
     if (batch.owner.toURI() != user.toURI()) {
         throw new Error('The batch does not belong to the current user')
     }
+    console.log('@debug user', user)
+    console.log('@debug usertype', user.type)
+    let req_state = 'infared'
+    let new_state = 'infared'
+    if (user.type == 'MANUFACTURER') {
+        req_state = 'PRODUCED';
+        new_state = 'SUPPLIER_DISPATCHED';
+    } else if (user.type == 'SUPPLIER') {
+        req_state = 'SUPPLIER_RECEIVED';
+        new_state = 'RETAILER_DISPATCHED';
+    } else {
+        throw new Error('Only a MANUFACTURER or SUPPLIER is allowed to dispatch a batch');
+    }
+    console.log('@debug req_state', req_state)
 
-    if (batch.status != 'PRODUCED') {
-        throw new Error('The batch has to be in PRODUCED status for it to be dispatched.');
+    if (batch.status != req_state) {
+        throw new Error('The batch has to be in {0} status for it to be dispatched.'.format(req_state));
     }
 
     if (recipient.type == 'MANUFACTURER') {
@@ -270,17 +292,18 @@ async function dispatchBatch(dispatchBatchTx) {
     batch.tempOwner = recipient;
     batch.updated = dispatchedOn;
     batch.updatedBy = user;
-    batch.status = 'SUPPLIER_DISPATCHED';
+    batch.status = new_state;
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.update(batch);
     
     let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
     for (each of batchUnits) {
-        each.status = 'SUPPLIER_DISPATCHED';
+        each.status = new_state;
         each.tempOwner = recipient;
     }
     await unitRegistry.updateAll(batchUnits);
 }
+
 
 // sell a unit
 async function sellUnit(sellUnitTx) {
