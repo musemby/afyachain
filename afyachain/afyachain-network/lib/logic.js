@@ -266,7 +266,7 @@ async function dispatchBatch(dispatchBatchTx) {
     let req_state = 'infared'
     let new_state = 'infared'
     if (user.type == 'MANUFACTURER') {
-        req_state = 'PRODUCED';
+        req_state = 'CODE_PRINTED';
         new_state = 'SUPPLIER_DISPATCHED';
     } else if (user.type == 'SUPPLIER') {
         req_state = 'SUPPLIER_RECEIVED';
@@ -295,11 +295,12 @@ async function dispatchBatch(dispatchBatchTx) {
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.update(batch);
     
-    let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
     for (each of batchUnits) {
         each.status = new_state;
         each.tempOwner = recipient;
     }
+
+    let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
     await unitRegistry.updateAll(batchUnits);
 }
 
@@ -398,6 +399,42 @@ async function verifyUnit(tx) {
     let unitAssetRegistry = await getAssetRegistry(biznet + '.Unit');
     await unitAssetRegistry.update(unit);
 };
+
+
+/**
+ * Prints labels for batch and its units
+ * @param {org.afyachain.PrintLabels} tx An instance of PrintLabels transaction
+ * @transaction
+ */
+async function printLabels(tx) {
+    var code = tx.batchCode;
+    let user = tx.user;
+
+    let batchRegistry = await getAssetRegistry(biznet + '.Batch');
+    let batch = await batchRegistry.get(code);
+
+    if (user.type != 'MANUFACTURER') {
+        throw new Error('Labels can only printed by a manufacturer');
+    }
+    if (user.toURI() != batch.owner.toURI()) {
+        throw new Error('Labels can only printed by the manufacturer who owns the batch')
+    }
+
+    if (batch.status != 'PRODUCED') {
+        throw new Error('The batch must be in PRODUCED state before its labels can be printed')
+    }
+
+    batch.status = 'CODE_PRINTED';
+    batchRegistry.update(batch);
+    
+    let batchUnits = await query('getUnitsByBatch', { batch: batch.toURI() });
+    for (each of batchUnits) {
+        each.status = 'CODE_PRINTED';
+    }
+
+    let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
+    await unitRegistry.updateAll(batchUnits);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function receiveBatch(receiveBatchTx) {

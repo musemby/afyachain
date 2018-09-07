@@ -208,6 +208,11 @@ transaction ReceiveUnit {
   --> ChainParticipant user
 }
 
+transaction PrintLabels {
+  o String batchCode
+  --> ChainParticipant user
+}
+
 // Put a pin in it
 transaction SplitBatch {
   --> Batch parentBatch
