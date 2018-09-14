@@ -51,10 +51,19 @@ asset Token identified by code {
 asset Activity identified by activityId {
   o String activityId
   o batchStatus logType
-  // o Batch batch optional
+  --> Batch batch optional
+  --> Unit unit optional
+  --> ChainParticipant from
+  --> ChainParticipant to
+  o DateTime occurredOn
+}
+
+event ActivityCapturedEvent {
+  o batchStatus logType
+  o Batch batch optional
   o Unit unit optional
-  o String fromName
-  o String toName
+  o ChainParticipant from
+  o ChainParticipant to
   o DateTime occurredOn
 }
 

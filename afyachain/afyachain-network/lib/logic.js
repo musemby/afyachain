@@ -7,7 +7,7 @@ var currentParticipant = getCurrentParticipant();
 const SEED = "FbooNFTdVbfAETPHKwwgJFRSu";
 let SEQUENCE_NUMBER = 341;
 
-// this is sinful AF but had to be done
+// this is sinful AF but had to be done(composer does not currently support third party libs in transaction chaincode)
 function sha1(msg) {
     function rotl(n, s) { return n << s | n >>> 32 - s; };
     function tohex(i) { for (var h = "", s = 28; ; s -= 4) { h += (i >>> s & 0xf).toString(16); if (!s) return h; } };
@@ -30,6 +30,13 @@ function sha1(msg) {
     }
     return tohex(H0) + tohex(H1) + tohex(H2) + tohex(H3) + tohex(H4);
 }
+
+
+// generate random string of specified size
+function randomString(length) {
+    return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1);
+}
+
 
 // add python style {}.format to strings
 String.prototype.format = function () {
@@ -129,6 +136,23 @@ async function logIn(tx) {
 }
 
 
+async function createActivity(args) {
+    let randstring = randomString(5)
+    let activityAssetRegistry = await getAssetRegistry('org.afyachain.Activity');
+    let factory = getFactory();
+    let actId = args.tID + String()
+    let createBatchActivity = factory.newResource(biznet, 'Activity', actId + '-' + randstring);
+    createBatchActivity.logType = args.logType;
+    createBatchActivity.from = args.from;
+    createBatchActivity.to = args.to;
+    createBatchActivity.occurredOn = args.occurredOn;
+    createBatchActivity.batch = args.batch;
+    createBatchActivity.unit = args.unit
+
+    activityAssetRegistry.add(createBatchActivity);
+}
+
+
 /**
  * Creates a batch
 * @param {org.afyachain.createBatch} createBatchTx An instance of createBatch transaction
@@ -139,7 +163,6 @@ async function createBatch(batchTx) {
     let tokenAssetRegistry = await getAssetRegistry('org.afyachain.Token');
     let batchAssetRegistry = await getAssetRegistry('org.afyachain.Batch');
     let unitAssetRegistry = await getAssetRegistry('org.afyachain.Unit');
-    let activityAssetRegistry = await getAssetRegistry('org.afyachain.Activity');
     
     let tokenData = {
         brand: batchTx.brand,
@@ -158,14 +181,6 @@ async function createBatch(batchTx) {
     token.updatedBy = batchTx.user;
     
     await tokenAssetRegistry.add(token);
-    
-    // let createBatchActivity = factory.newResource(biznet, 'Activity', '78754454857845');
-    // createBatchActivity.logType = 'PRODUCED';
-    // createBatchActivity.fromName = batchTx.user.name;
-    // createBatchActivity.toName = batchTx.user.name;
-    // createBatchActivity.occurredOn = batchTx.created;
-
-    // activityAssetRegistry.add(createBatchActivity);
 
     // create a batch using the token and code created above
     let batch = factory.newResource(biznet, 'Batch', token.code);
@@ -182,6 +197,16 @@ async function createBatch(batchTx) {
     batch.updatedBy = batchTx.user;
 
     await batchAssetRegistry.add(batch);
+
+    let args = {
+        from: batchTx.user,
+        to: batchTx.user,
+        logType: batch.status,
+        occurredOn: batchTx.created,
+        batch: batch,
+        tID: batchTx.transactionId
+    }
+    await createActivity(args);
 
     // update token  with new batch
     token.batch = batch;
@@ -217,6 +242,16 @@ async function createBatch(batchTx) {
         unit.createdBy = batchTx.user;
         unit.updatedBy = batchTx.user;
 
+        let args = {
+            from: batchTx.user,
+            to: batchTx.user,
+            logType: batch.status,
+            occurredOn: batchTx.created,
+            unit: unit,
+            tID: batchTx.transactionId
+        }
+        await createActivity(args);
+
         // let createUnitActivity = factory.newResource(biznet, 'Activity', batchTx.transactionId + String(i));
         // createUnitActivity.unit = unit;
         // createUnitActivity.logType = 'PRODUCED';
@@ -226,6 +261,8 @@ async function createBatch(batchTx) {
 
         // createUnitActivities.push(createUnitActivity);
         // await activityAssetRegistry.add(createUnitActivity);
+
+
         unitsToCreate.push(unit);
     }
     
@@ -295,7 +332,6 @@ async function dispatchBatch(dispatchBatchTx) {
     } else {
         throw new Error('Only a MANUFACTURER or SUPPLIER is allowed to dispatch a batch');
     }
-    console.log('@debug req_state', req_state)
 
     if (batch.status != req_state) {
         throw new Error('The batch has to be in {0} status for it to be dispatched.'.format(req_state));
@@ -313,12 +349,34 @@ async function dispatchBatch(dispatchBatchTx) {
     batch.updated = dispatchedOn;
     batch.updatedBy = user;
     batch.status = new_state;
+
     let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
     await assetRegistry.update(batch);
     
+
+    let args = {
+        from: user,
+        to: recipient,
+        logType: new_state,
+        occurredOn: dispatchedOn,
+        batch: batch,
+        tID: dispatchBatchTx.transactionId
+    }
+    await createActivity(args);
+
     for (each of batchUnits) {
         each.status = new_state;
         each.tempOwner = recipient;
+
+        let args = {
+            from: user,
+            to: recipient,
+            logType: new_state,
+            occurredOn: dispatchedOn,
+            unit: each,
+            tID: dispatchBatchTx.transactionId
+        }
+        await createActivity(args);
     }
 
     let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
@@ -371,6 +429,17 @@ async function verifyBatch(tx) {
     if (batch.tempOwner.toURI() != tx.user.toURI()) {
         throw new Error('This batch has not been dispatched to this user yet');
     }
+
+    let args = {
+        from: batch.owner,
+        to: tx.user,
+        logType: new_state,
+        occurredOn: verifiedOn,
+        batch: batch,
+        tID: tx.transactionId
+    }
+    await createActivity(args);
+
     batch.owner = tx.user;
     batch.updated = verifiedOn;
     batch.updatedBy = tx.user;
@@ -397,8 +466,6 @@ async function verifyUnit(tx) {
 
     let assetRegistry = await getAssetRegistry(biznet + '.Unit');
     let unit = await assetRegistry.get(unitCode);
-    console.log('@debug tempowner', unit.tempOwner.toURI());
-    console.log('@debug user', user.toURI());
     if (unit.batch.toURI() != batch.toURI()) {
         throw new Error('This unit was not dispatched as part of this batch');
     }
@@ -412,6 +479,16 @@ async function verifyUnit(tx) {
     } else if (unit.status == 'SUPPLIER_DISPATCHED') {
         new_state = 'SUPPLIER_RECEIVED';
     }
+
+    let args = {
+        from: unit.owner,
+        to: user,
+        logType: new_state,
+        occurredOn: verifiedOn,
+        unit: unit,
+        tID: tx.transactionId
+    }
+    await createActivity(args);
 
     unit.status = new_state;
     unit.owner = user;
