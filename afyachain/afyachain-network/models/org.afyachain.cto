@@ -35,17 +35,8 @@ enum batchStatus {
   o SOLD
 }
 
-enum unitStatus {
-  o PRODUCED
-  o CODE_PRINTED
-  o SUPPLIER_DISPATCHED
-  o SUPPLIER_RECEIVED
-  o RETAILER_DISPATCHED
-  o RETAILER_RECEIVED
-  o SOLD
-}
 
-//----------------------------Assets----------------------------------------------------------
+//-----------------------------------------Assets----------------------------------------------------------
 
 asset Token identified by code {
   o String code
@@ -55,6 +46,16 @@ asset Token identified by code {
   o DateTime updated
   --> ChainParticipant createdBy
   --> ChainParticipant updatedBy
+}
+
+asset Activity identified by activityId {
+  o String activityId
+  o batchStatus logType
+  // o Batch batch optional
+  o Unit unit optional
+  o String fromName
+  o String toName
+  o DateTime occurredOn
 }
 
 participant ChainParticipant identified by email {
@@ -94,6 +95,7 @@ asset Batch identified by code {
   --> ChainParticipant owner
   --> ChainParticipant tempOwner optional
   --> Batch parentBatch optional
+  // o Activity [] activities
   o DateTime created
   o DateTime updated
   --> ChainParticipant createdBy
@@ -102,7 +104,7 @@ asset Batch identified by code {
 
 asset Unit identified by code {
   o String code
-  o unitStatus status default='PRODUCED'
+  o batchStatus status default='PRODUCED'
   o Boolean sold default=false
   --> Batch batch
   --> Token token

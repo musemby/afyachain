@@ -139,6 +139,7 @@ async function createBatch(batchTx) {
     let tokenAssetRegistry = await getAssetRegistry('org.afyachain.Token');
     let batchAssetRegistry = await getAssetRegistry('org.afyachain.Batch');
     let unitAssetRegistry = await getAssetRegistry('org.afyachain.Unit');
+    let activityAssetRegistry = await getAssetRegistry('org.afyachain.Activity');
     
     let tokenData = {
         brand: batchTx.brand,
@@ -150,7 +151,7 @@ async function createBatch(batchTx) {
     
     // create a new Batch token and add it to the registry
     let factory = getFactory();
-    let token = factory.newResource('org.afyachain', 'Token', String(code));
+    let token = factory.newResource(biznet, 'Token', String(code));
     token.created = batchTx.created;
     token.updated = batchTx.created;
     token.createdBy = batchTx.user;
@@ -158,28 +159,38 @@ async function createBatch(batchTx) {
     
     await tokenAssetRegistry.add(token);
     
+    // let createBatchActivity = factory.newResource(biznet, 'Activity', '78754454857845');
+    // createBatchActivity.logType = 'PRODUCED';
+    // createBatchActivity.fromName = batchTx.user.name;
+    // createBatchActivity.toName = batchTx.user.name;
+    // createBatchActivity.occurredOn = batchTx.created;
+
+    // activityAssetRegistry.add(createBatchActivity);
+
     // create a batch using the token and code created above
-    let batch = factory.newResource('org.afyachain', 'Batch', token.code);
+    let batch = factory.newResource(biznet, 'Batch', token.code);
     batch.brand = batchTx.brand;
     batch.unitCount = batchTx.unitCount;
     batch.manufactureDate = batchTx.manufactureDate;
     batch.expiryDate = batchTx.expiryDate;
     batch.token = token;
+    // batch.activitiies.push(createBatchActivity);
     batch.owner = batchTx.owner;
     batch.created = batchTx.created;
     batch.updated = batchTx.created;
     batch.createdBy = batchTx.user;
     batch.updatedBy = batchTx.user;
-    
+
     await batchAssetRegistry.add(batch);
-    
+
     // update token  with new batch
     token.batch = batch;
     tokenAssetRegistry.update(token);
-    
+
     // CREATE UNITS
     // get a code from the generator
     let unitsToCreate = [];
+    let createUnitActivities = [];
     for(i=0; i<batchTx.unitCount; i++) {
         let unitTokenData = {
             batch: batch,
@@ -205,13 +216,23 @@ async function createBatch(batchTx) {
         unit.updated = batchTx.created;
         unit.createdBy = batchTx.user;
         unit.updatedBy = batchTx.user;
-        
+
+        // let createUnitActivity = factory.newResource(biznet, 'Activity', batchTx.transactionId + String(i));
+        // createUnitActivity.unit = unit;
+        // createUnitActivity.logType = 'PRODUCED';
+        // createUnitActivity.fromName = batchTx.user.name;
+        // createUnitActivity.toName = batchTx.user.name;
+        // createUnitActivity.occurredOn = batchTx.created;
+
+        // createUnitActivities.push(createUnitActivity);
+        // await activityAssetRegistry.add(createUnitActivity);
         unitsToCreate.push(unit);
     }
     
     // update batch with unit
     // update token with unit
     await unitAssetRegistry.addAll(unitsToCreate);
+    // await activityAssetRegistry.addAll(createUnitActivities);
     // update batch with unit
     
     // update token with unit
@@ -354,9 +375,9 @@ async function verifyBatch(tx) {
     batch.updated = verifiedOn;
     batch.updatedBy = tx.user;
     batch.tempOwner = null;
-    batch.status = new_state;RETAILER_DISPATCHED
+    batch.status = new_state;
+
     await assetRegistry.update(batch);
-        
     }
 
 /**
