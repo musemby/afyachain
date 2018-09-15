@@ -55,6 +55,8 @@ asset Activity identified by activityId {
   --> Unit unit optional
   --> ChainParticipant from
   --> ChainParticipant to
+  o String fromName
+  o String toName
   o DateTime occurredOn
 }
 
@@ -222,6 +224,11 @@ transaction ReceiveUnit {
 transaction PrintLabels {
   o String batchCode
   --> ChainParticipant user
+}
+
+@returns(Activity[])
+transaction GetActivities {
+  --> Batch batch
 }
 
 // Put a pin in it

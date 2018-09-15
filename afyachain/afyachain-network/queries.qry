@@ -3,3 +3,10 @@ query getUnitsByBatch {
   statement:
     SELECT org.afyachain.Unit WHERE (batch == _$batch)
 }
+
+
+query getActivitiesByBatch {
+  description: "Get activities linked to the batch"
+  statement:
+    SELECT org.afyachain.Activity WHERE (batch == _$batch)
+}

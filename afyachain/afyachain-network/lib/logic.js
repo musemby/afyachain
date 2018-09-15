@@ -145,6 +145,8 @@ async function createActivity(args) {
     createBatchActivity.logType = args.logType;
     createBatchActivity.from = args.from;
     createBatchActivity.to = args.to;
+    createBatchActivity.fromName = args.from.name;
+    createBatchActivity.toName = args.to.name;
     createBatchActivity.occurredOn = args.occurredOn;
     createBatchActivity.batch = args.batch;
     createBatchActivity.unit = args.unit
@@ -201,6 +203,8 @@ async function createBatch(batchTx) {
     let args = {
         from: batchTx.user,
         to: batchTx.user,
+        fromName: batchTx.user.name,
+        toName: batchTx.user.name,
         logType: batch.status,
         occurredOn: batchTx.created,
         batch: batch,
@@ -245,6 +249,8 @@ async function createBatch(batchTx) {
         let args = {
             from: batchTx.user,
             to: batchTx.user,
+            fromName: batchTx.user.name,
+            toName: batchTx.user.name,
             logType: batch.status,
             occurredOn: batchTx.created,
             unit: unit,
@@ -357,6 +363,8 @@ async function dispatchBatch(dispatchBatchTx) {
     let args = {
         from: user,
         to: recipient,
+        fromName: user.name,
+        toName: recipient.name,
         logType: new_state,
         occurredOn: dispatchedOn,
         batch: batch,
@@ -371,6 +379,8 @@ async function dispatchBatch(dispatchBatchTx) {
         let args = {
             from: user,
             to: recipient,
+            fromName: user.name,
+            toName: recipient.name,
             logType: new_state,
             occurredOn: dispatchedOn,
             unit: each,
@@ -433,6 +443,8 @@ async function verifyBatch(tx) {
     let args = {
         from: batch.owner,
         to: tx.user,
+        fromName: batch.owner.name,
+        toName: tx.user.name,
         logType: new_state,
         occurredOn: verifiedOn,
         batch: batch,
@@ -483,6 +495,8 @@ async function verifyUnit(tx) {
     let args = {
         from: unit.owner,
         to: user,
+        fromName: batch.owner,
+        toName: tx.user,
         logType: new_state,
         occurredOn: verifiedOn,
         unit: unit,
@@ -532,6 +546,17 @@ async function printLabels(tx) {
 
     let unitRegistry = await getAssetRegistry('org.afyachain.Unit');
     await unitRegistry.updateAll(batchUnits);
+}
+
+
+/**
+ * Get activities by batch
+ * @param {org.afyachain.GetActivities} tx An instance of GetActivities transaction
+ * @transaction
+ */
+async function getActivities(tx) {
+    let batchActivities = await query('getActivitiesByBatch', { batch: tx.batch.toURI() });
+    return batchActivities
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
