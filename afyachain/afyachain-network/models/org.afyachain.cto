@@ -106,7 +106,6 @@ asset Batch identified by code {
   --> ChainParticipant owner
   --> ChainParticipant tempOwner optional
   --> Batch parentBatch optional
-  // o Activity [] activities
   o DateTime created
   o DateTime updated
   --> ChainParticipant createdBy

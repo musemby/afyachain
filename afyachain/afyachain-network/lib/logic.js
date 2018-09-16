@@ -145,13 +145,13 @@ async function createActivity(args) {
     createBatchActivity.logType = args.logType;
     createBatchActivity.from = args.from;
     createBatchActivity.to = args.to;
-    createBatchActivity.fromName = args.from.name;
-    createBatchActivity.toName = args.to.name;
+    createBatchActivity.fromName = args.fromName;
+    createBatchActivity.toName = args.toName;
     createBatchActivity.occurredOn = args.occurredOn;
     createBatchActivity.batch = args.batch;
     createBatchActivity.unit = args.unit
 
-    activityAssetRegistry.add(createBatchActivity);
+    await activityAssetRegistry.add(createBatchActivity);
 }
 
 
@@ -440,16 +440,21 @@ async function verifyBatch(tx) {
         throw new Error('This batch has not been dispatched to this user yet');
     }
 
+    let identifier = batch.owner.getIdentifier();
+    let participantRegistry = await getParticipantRegistry('org.afyachain.ChainParticipant');
+    let owner = await participantRegistry.get(identifier);
+
     let args = {
         from: batch.owner,
         to: tx.user,
-        fromName: batch.owner.name,
+        fromName: owner.name,
         toName: tx.user.name,
         logType: new_state,
         occurredOn: verifiedOn,
         batch: batch,
         tID: tx.transactionId
-    }
+    };
+
     await createActivity(args);
 
     batch.owner = tx.user;
@@ -492,11 +497,15 @@ async function verifyUnit(tx) {
         new_state = 'SUPPLIER_RECEIVED';
     }
 
+    let identifier = unit.owner.getIdentifier();
+    let participantRegistry = await getParticipantRegistry('org.afyachain.ChainParticipant');
+    let owner = await participantRegistry.get(identifier);
+
     let args = {
         from: unit.owner,
         to: user,
-        fromName: batch.owner,
-        toName: tx.user,
+        fromName: owner.name,
+        toName: user.name,
         logType: new_state,
         occurredOn: verifiedOn,
         unit: unit,
