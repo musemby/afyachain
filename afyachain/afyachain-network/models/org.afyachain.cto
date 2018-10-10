@@ -105,6 +105,9 @@ asset Batch identified by code {
   --> Token token
   --> ChainParticipant owner
   --> ChainParticipant tempOwner optional
+  --> ChainParticipant manufacturerOwner optional
+  --> ChainParticipant supplierOwner optional
+  --> ChainParticipant retailerOwner optional
   --> Batch parentBatch optional
   o DateTime created
   o DateTime updated
@@ -118,8 +121,11 @@ asset Unit identified by code {
   o Boolean sold default=false
   --> Batch batch
   --> Token token
-  --> ChainParticipant tempOwner optional
   --> ChainParticipant owner
+  --> ChainParticipant tempOwner optional
+  --> ChainParticipant manufacturerOwner optional
+  --> ChainParticipant supplierOwner optional
+  --> ChainParticipant retailerOwner optional
   o DateTime created
   o DateTime updated
   --> ChainParticipant createdBy
@@ -227,7 +233,8 @@ transaction PrintLabels {
 
 @returns(Activity[])
 transaction GetActivities {
-  --> Batch batch
+  --> Batch batch optional
+  --> Unit unit optional
 }
 
 // Put a pin in it
