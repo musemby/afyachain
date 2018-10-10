@@ -193,6 +193,7 @@ async function createBatch(batchTx) {
     batch.token = token;
     // batch.activitiies.push(createBatchActivity);
     batch.owner = batchTx.owner;
+    batch.manufacturerOwner = batchTx.owner;
     batch.created = batchTx.created;
     batch.updated = batchTx.created;
     batch.createdBy = batchTx.user;
@@ -241,6 +242,7 @@ async function createBatch(batchTx) {
         unit.batch = batch;
         unit.token = unitToken;
         unit.owner = batchTx.owner;
+        batch.manufacturerOwner = batchTx.owner;
         unit.created = batchTx.created;
         unit.updated = batchTx.created;
         unit.createdBy = batchTx.user;
@@ -416,13 +418,18 @@ async function verifyBatch(tx) {
     let verifiedOn = tx.verifiedOn;
     let assetRegistry = await getAssetRegistry(biznet + '.Batch');
     let batch = await assetRegistry.get(code);
+    
+    let supplierOwner = batch.supplierOwner;
+    let retailerOwner = batch.supplierOwner;
 
     let req_state = 'infared'
     let new_state = 'infared'
     if (tx.user.type == 'SUPPLIER') {
+        supplierOwner = tx.user;
         req_state = 'SUPPLIER_DISPATCHED';
         new_state = 'SUPPLIER_RECEIVED';
     } else if (tx.user.type == 'RETAILER') {
+        retailerOwner = tx.user;
         req_state = 'RETAILER_DISPATCHED';
         new_state = 'RETAILER_RECEIVED';
     } else {
@@ -458,9 +465,11 @@ async function verifyBatch(tx) {
     await createActivity(args);
 
     batch.owner = tx.user;
+    batch.tempOwner = null;
+    batch.supplierOwner = supplierOwner;
+    batch.retailerOwner = retailerOwner;
     batch.updated = verifiedOn;
     batch.updatedBy = tx.user;
-    batch.tempOwner = null;
     batch.status = new_state;
 
     await assetRegistry.update(batch);
@@ -478,6 +487,9 @@ async function verifyUnit(tx) {
     let verifiedOn = tx.verifiedOn;
     let user = tx.user;
 
+    let supplierOwner = batch.supplierOwner;
+    let retailerOwner = batch.supplierOwner;
+
     let batchRegistry = await getAssetRegistry(biznet + '.Batch');
     let batch = await batchRegistry.get(batchCode);
 
@@ -492,8 +504,10 @@ async function verifyUnit(tx) {
 
     let new_state = 'infared';
     if (unit.status == 'RETAILER_DISPATCHED') {
+        retailerOwner = user;
         new_state = 'RETAILER_RECEIVED';
     } else if (unit.status == 'SUPPLIER_DISPATCHED') {
+        supplierOwner = user;
         new_state = 'SUPPLIER_RECEIVED';
     }
 
@@ -516,6 +530,9 @@ async function verifyUnit(tx) {
     unit.status = new_state;
     unit.owner = user;
     unit.tempOwner = null;
+
+    unit.supplierOwner = supplierOwner;
+    unit.retailerOwner = retailerOwner;
 
     let unitAssetRegistry = await getAssetRegistry(biznet + '.Unit');
     await unitAssetRegistry.update(unit);
