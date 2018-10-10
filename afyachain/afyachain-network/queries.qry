@@ -10,3 +10,28 @@ query getActivitiesByBatch {
   statement:
     SELECT org.afyachain.Activity WHERE (batch == _$batch)
 }
+
+
+query getBatchesByManufacturer {
+  description: "Given a user id, return all batches with manufacturerOwner as this user"
+  statement: 
+    SELECT org.afyachain.Batch WHERE (manufacturerOwner == _$manufacturerOwner)
+}
+
+query getBatchesByManufacturerByStatus {
+  description: "Given a user id, return all batches with manufacturerOwner as this user and this status"
+  statement: 
+    SELECT org.afyachain.Batch WHERE (manufacturerOwner == _$manufacturerOwner AND status == _$status)
+}
+
+query getUnitsByManufacturer {
+  description: "Given a user id, return all units with manufacturerOwner as this user"
+  statement: 
+    SELECT org.afyachain.Unit WHERE (manufacturerOwner == _$manufacturerOwner)
+}
+
+query getUnitsByManufacturerByStatus {
+  description: "Given a user id, return all units with manufacturerOwner as this user and this status"
+  statement: 
+    SELECT org.afyachain.Unit WHERE (manufacturerOwner == _$manufacturerOwner AND status == _$status)
+}

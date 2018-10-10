@@ -35,6 +35,14 @@ enum batchStatus {
   o SOLD
 }
 
+concept dashboardReport {
+  o Integer batchesProduced
+  o Integer unitsProduced
+  o Integer supplierReceivedBatches
+  o Integer retailerReceivedBatches
+  o Integer supplierReceivedUnits
+  o Integer retailerReceivedUnits
+}
 
 //-----------------------------------------Assets----------------------------------------------------------
 
@@ -235,6 +243,11 @@ transaction PrintLabels {
 transaction GetActivities {
   --> Batch batch optional
   --> Unit unit optional
+}
+
+@returns(dashboardReport)
+transaction manufacturerDashboardReport {
+  --> ChainParticipant manufacturerOwner
 }
 
 // Put a pin in it

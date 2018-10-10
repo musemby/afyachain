@@ -173,7 +173,7 @@ async function createBatch(batchTx) {
         expiry: batchTx.expiryDate
     }
     let code = _generate_code(tokenData, 'Batch');
-    
+
     // create a new Batch token and add it to the registry
     let factory = getFactory();
     let token = factory.newResource(biznet, 'Token', String(code));
@@ -242,7 +242,7 @@ async function createBatch(batchTx) {
         unit.batch = batch;
         unit.token = unitToken;
         unit.owner = batchTx.owner;
-        batch.manufacturerOwner = batchTx.owner;
+        unit.manufacturerOwner = batchTx.owner;
         unit.created = batchTx.created;
         unit.updated = batchTx.created;
         unit.createdBy = batchTx.user;
@@ -487,11 +487,12 @@ async function verifyUnit(tx) {
     let verifiedOn = tx.verifiedOn;
     let user = tx.user;
 
+    let batchRegistry = await getAssetRegistry(biznet + '.Batch');
+    let batch = await batchRegistry.get(batchCode);
+
     let supplierOwner = batch.supplierOwner;
     let retailerOwner = batch.supplierOwner;
 
-    let batchRegistry = await getAssetRegistry(biznet + '.Batch');
-    let batch = await batchRegistry.get(batchCode);
 
     let assetRegistry = await getAssetRegistry(biznet + '.Unit');
     let unit = await assetRegistry.get(unitCode);
@@ -584,6 +585,64 @@ async function getActivities(tx) {
     let batchActivities = await query('getActivitiesByBatch', { batch: tx.batch.toURI() });
     return batchActivities
 }
+
+
+/**
+ * Create the manufacturer dashboard report
+ * @param {org.afyachain.manufacturerDashboardReport} tx An instance of manufacturerDashBoardReport transaction
+ * @transaction
+ */
+async function manufacturerDashboardReport(tx) {
+    console.log("@debug Tuko ndani === ", tx.manufacturerOwner);
+    let factory = getFactory();
+    let manufacturerOwner = tx.manufacturerOwner;
+    let batches = await query('getBatchesByManufacturer', { manufacturerOwner: manufacturerOwner.toURI() });
+    let units = await query('getUnitsByManufacturer', { manufacturerOwner: manufacturerOwner.toURI() });
+
+    let supplierReceivedBatches = await query('getBatchesByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'SUPPLIER_RECEIVED' })
+    let retailerReceivedBatches = await query('getBatchesByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'RETAILER_RECEIVED' })
+
+    let supplierReceivedUnits = await query('getUnitsByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'SUPPLIER_RECEIVED' })
+    let retailerReceivedUnits = await query('getUnitsByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'RETAILER_RECEIVED' })
+    
+
+    console.log("@debug After querying === ", batches, " ", units);
+    const report = factory.newConcept(biznet, 'dashboardReport');
+    report.batchesProduced = batches.length;
+    report.unitsProduced = units.length;
+    report.supplierReceivedBatches = supplierReceivedBatches.length;
+    report.retailerReceivedBatches = retailerReceivedBatches.length;
+    report.supplierReceivedUnits = supplierReceivedUnits.length;
+    report.retailerReceivedUnits = retailerReceivedUnits.length;
+
+    console.log("@debug report=== ", report)
+
+    return report;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     async function receiveBatch(receiveBatchTx) {
