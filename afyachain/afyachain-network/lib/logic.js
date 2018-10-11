@@ -592,6 +592,8 @@ async function manufacturerDashboardReport(tx) {
 
     let supplierReceivedUnits = await query('getUnitsByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'SUPPLIER_RECEIVED' })
     let retailerReceivedUnits = await query('getUnitsByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'RETAILER_RECEIVED' })
+
+    let batchesFailedByManufacturer = await query('batchesFailedByManufacturer', {manufacturerOwner: manufacturerOwner.toURI()})
     
 
     console.log("@debug After querying === ", batches, " ", units);
@@ -602,8 +604,61 @@ async function manufacturerDashboardReport(tx) {
     report.retailerReceivedBatches = retailerReceivedBatches.length;
     report.supplierReceivedUnits = supplierReceivedUnits.length;
     report.retailerReceivedUnits = retailerReceivedUnits.length;
+    report.batchesFailed = batchesFailedByManufacturer.length;
 
     console.log("@debug report=== ", report)
+
+    return report;
+}
+
+/**
+ * Create the manufacturer dashboard report
+ * @param {org.afyachain.supplierDashboardReport} tx An instance of manufacturerDashBoardReport transaction
+ * @transaction
+ */
+async function supplierDashboardReport(tx) {
+    console.log("@debug Tuko ndani === ", tx.supplierOwner);
+    let factory = getFactory();
+    let supplierOwner = tx.supplierOwner;
+    let batchesEncountered = await query('getBatchesBySupplier', { supplierOwner: supplierOwner.toURI() });
+    let batchesEnroute = await query('getBatchesEnrouteToSupplier', { supplierOwner: supplierOwner.toURI() })
+    let dispatchedToRetailers = await query('getBatchesDispatchedToRetailer', {supplierOwner: supplierOwner.toURI()})
+    let batchesInPossession = await query('getBatchesInPossession', {supplierOwner: supplierOwner.toURI() })
+    // let retailerReceivedBatches = await query('getBatchesByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'RETAILER_RECEIVED' })
+
+    // let batchesFailedByManufacturer = await query('batchesFailedByManufacturer', { manufacturerOwner: manufacturerOwner.toURI() })
+
+    const report = factory.newConcept(biznet, 'supplierReport');
+    report.batchesEncountered = batchesEncountered.length;
+    report.batchesEnroute = batchesEnroute.length;
+    report.dispatchedToRetailers = dispatchedToRetailers.length;
+    report.batchesInPossession = batchesInPossession.length;
+
+
+    return report;
+}
+
+/**
+ * Create the manufacturer dashboard report
+ * @param {org.afyachain.retailerDashboardReport} tx An instance of manufacturerDashBoardReport transaction
+ * @transaction
+ */
+async function retailerDashboardReport(tx) {
+    console.log("@debug Tuko ndani === ", tx.retailerOwner);
+    let factory = getFactory();
+    let retailerOwner = tx.retailerOwner;
+    let batchesEncountered = await query('getBatchesByRetailer', { retailerOwner: retailerOwner.toURI() });
+    let batchesEnroute = await query('getBatchesEnrouteToRetailer', { retailerOwner: retailerOwner.toURI() })
+    let batchesInPossession = await query('getBatchesInRetailerPossession', { retailerOwner: retailerOwner.toURI() })
+    // let retailerReceivedBatches = await query('getBatchesByManufacturerByStatus', { manufacturerOwner: manufacturerOwner.toURI(), status: 'RETAILER_RECEIVED' })
+
+    // let batchesFailedByManufacturer = await query('batchesFailedByManufacturer', { manufacturerOwner: manufacturerOwner.toURI() })
+
+    const report = factory.newConcept(biznet, 'retailerReport');
+    report.batchesEncountered = batchesEncountered.length;
+    report.batchesEnroute = batchesEnroute.length;
+    report.batchesInPossession = batchesInPossession.length;
+
 
     return report;
 }

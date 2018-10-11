@@ -35,3 +35,52 @@ query getUnitsByManufacturerByStatus {
   statement: 
     SELECT org.afyachain.Unit WHERE (manufacturerOwner == _$manufacturerOwner AND status == _$status)
 }
+
+query batchesFailedByManufacturer {
+  description: "Get batches linked to error reports sent to current manufacturer"
+  statement: SELECT org.afyachain.errorReport WHERE (recipient == _$manufacturerOwner)
+}
+
+query getBatchesBySupplier {
+  description: "Given a user id, return all batches with supplierOwner as this user"
+  statement: 
+    SELECT org.afyachain.Batch WHERE (supplierOwner == _$supplierOwner)
+}
+
+query getBatchesEnrouteToSupplier {
+  description: ""
+  statement: 
+    SELECT org.afyachain.Batch WHERE (tempOwner == _$supplierOwner)
+}
+
+query getBatchesDispatchedToRetailer {
+  description: ""
+  statement: 
+    SELECT org.afyachain.Batch WHERE (supplierOwner == _$supplierOwner AND status == 'RETAILER_RECEIVED')
+}
+
+query getBatchesInPossession {
+  description: ""
+  statement: 
+    SELECT org.afyachain.Batch WHERE (owner == _$supplierOwner)
+}
+
+// --------------------------------------------------------------------------
+
+query getBatchesByRetailer {
+  description: ""
+  statement: 
+    SELECT org.afyachain.Batch WHERE (retailerOwner == _$retailerOwner)
+}
+
+query getBatchesEnrouteToRetailer {
+  description: ""
+  statement: 
+    SELECT org.afyachain.Batch WHERE (tempOwner == _$retailerOwner)
+}
+
+query getBatchesInRetailerPossession {
+  description: ""
+  statement: 
+    SELECT org.afyachain.Batch WHERE (owner == _$retailerOwner)
+}
