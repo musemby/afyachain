@@ -260,16 +260,6 @@ async function createBatch(batchTx) {
         }
         await createActivity(args);
 
-        // let createUnitActivity = factory.newResource(biznet, 'Activity', batchTx.transactionId + String(i));
-        // createUnitActivity.unit = unit;
-        // createUnitActivity.logType = 'PRODUCED';
-        // createUnitActivity.fromName = batchTx.user.name;
-        // createUnitActivity.toName = batchTx.user.name;
-        // createUnitActivity.occurredOn = batchTx.created;
-
-        // createUnitActivities.push(createUnitActivity);
-        // await activityAssetRegistry.add(createUnitActivity);
-
 
         unitsToCreate.push(unit);
     }
@@ -285,29 +275,6 @@ async function createBatch(batchTx) {
     return batch;
 }
 
-
-/**
- * Creates a batch
-* @param {org.afyachain.createBrand} createBrandTx An instance of createBrand transaction
-* @transaction
-*/
-async function createBrand(createBrandTx) {
-    let ingredients = createBrandTx.ingredients.split(",");
-    let newBrand = {
-        brandId: createBrandTx.brandId,
-        name: createBrandTx.name,
-        mainIngredient: createBrandTx.mainIngredient,
-        ingredients: ingredients,
-        created: createBrandTx.created,
-        updated: createBrandTx.updated,
-        createdBy: createBrandTx.user,
-        updatedBy: createBrandTx.user,
-        owner: createBrandTx.user
-    }
-    
-    let assetRegistry = await getAssetRegistry('org.afyachain.Batch');
-    await assetRegistry.add(newBrand);
-}
 
 
 // TODO: Is expiry date determinable beforehand?
@@ -437,7 +404,7 @@ async function verifyBatch(tx) {
     }
 
     if (batch.status != req_state) {
-        throw new Error('This batch has not been dispatched to this user yet');
+        throw new Error('The batch has to have been dispatched before it can be verified');
     }
     if (batch.expiryDate < tx.verifiedOn) {
         throw new Error('This batch is already expired');
@@ -584,6 +551,27 @@ async function printLabels(tx) {
 async function getActivities(tx) {
     let batchActivities = await query('getActivitiesByBatch', { batch: tx.batch.toURI() });
     return batchActivities
+}
+
+/**
+ * File an error report
+ * @param {org.afyachain.fileErrorReport} tx An instance of manufacturerDashBoardReport transaction
+ * @transaction
+ */
+async function fileErrorReport(tx) {
+    let factory = getFactory();
+    let randstring = randomString(5);
+    let actId = tx.transactionId + '-' + randstring;
+
+    let report = factory.newResource(biznet, "errorReport", actId);
+    report.batch = tx.batch;
+    report.unit = tx.unit;
+    report.error = tx.error;
+    report.info = tx.info;
+    report.occurredOn = tx.occurredOn;
+
+    let reportRegistry = await getAssetRegistry(biznet + '.errorReport');
+    reportRegistry.add(report);
 }
 
 

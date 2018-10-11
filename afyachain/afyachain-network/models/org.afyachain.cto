@@ -68,6 +68,17 @@ asset Activity identified by activityId {
   o DateTime occurredOn
 }
 
+asset errorReport identified by reportId {
+  o String reportId
+  o ChainParticipant recipient
+  o ChainParticipant sender
+  o Batch batch optional
+  o Unit unit optional
+  o String error
+  o String info
+  o DateTime occurredOn
+}
+
 event ActivityCapturedEvent {
   o batchStatus logType
   o Batch batch optional
@@ -76,6 +87,7 @@ event ActivityCapturedEvent {
   o ChainParticipant to
   o DateTime occurredOn
 }
+
 
 participant ChainParticipant identified by email {
   o String email
@@ -248,6 +260,16 @@ transaction GetActivities {
 @returns(dashboardReport)
 transaction manufacturerDashboardReport {
   --> ChainParticipant manufacturerOwner
+}
+
+transaction fileErrorReport {
+  --> ChainParticipant recipient
+  --> ChainParticipant sender
+  --> Batch batch optional
+  --> Unit unit optional
+  o String error
+  o String info optional
+  o DateTime occurredOn
 }
 
 // Put a pin in it
